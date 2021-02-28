@@ -3,7 +3,7 @@
 //itemManager.Unlock(gameManager.focusCity.items.gold);
 //gameManager.focusCity.items.gold.amount += 10;
 //gameManager.SetItemElements();
-//Branch test
+//Branch test2
 var upgradeManager = new UpgradeManager();
 gameManager.createCity("Angkor");
 gameManager.initialize();
