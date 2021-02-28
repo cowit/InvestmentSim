@@ -361,7 +361,7 @@ class Project {
 
     constructor(conObj) {
 
-        this.name = conObj.name; //Name of the project.
+        this.name = conObj.projectName; //Name of the project.
         this.description = conObj.projectDescription; //Description of the project.
         this.nameOfAmount = conObj.nameOfAmount;
         this.projects = conObj.projects; //The projects which this belongs to.
