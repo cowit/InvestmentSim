@@ -31,7 +31,7 @@ class UpgradeManager {
             )
             this.influentialFarmsUnlocked = true;
         }
-        if (city.projects.farm.amount >= 25 && this.fallowedFieldsUnlocked == false) {
+        if (city.projects.farm.amount >= 25 && this.fallowedFieldsUnlocked == undefined) {
             this.fallowedFields = new Upgrade(
                 this,
                 "fallowedFields",
