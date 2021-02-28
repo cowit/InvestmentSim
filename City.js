@@ -7,11 +7,11 @@ class City {
 
 
     //Stats
-    maxTraders; //The amount of traders that can come from this city.
 
     //Modifiers
     constructor(name) {
         this.name = name;
+        console.log("Test");
     }
 
     produce() {
