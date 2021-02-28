@@ -4,12 +4,263 @@ class Projects {
     constructor(city) {
         this.city = city;
         this.itemDisplay = new ItemDisplay(city, this);
-        this.wheatFarm = new WheatFarm(city, this);
-        this.granary = new Granary(city, this);
-        this.lumberCamp = new LumberCamp(city, this);
-        this.housing = new Housing(city, this);
-        this.workshop = new Workshop(city, this);
+        //#region landManagement
+        this.landManagement = new Project(
+            {
+                projectName: "Land Management", //Displayed name.
+                projectDescription: "The land administered by this city. The amount you control is increased by your influence. Each piece of land needs additional influence.", //The displayed description of the project.
+                nameOfAmount: "Projects", //The name of each individual purchase.
+                projectId: "landManagement", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: 2, //The column which this is put into.
+                unpurchasable: false, //Will hide the amount and buy button elements if false.
+                jobList: [], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [], //Put a Ref in to tell it what this costs. 
+                functionsList: [
+                    {
+                        callBack: "onStart",
+                        onCall: function () {
+                            this.land = 51;
+                            this.influencedLand = 1;
+                            this.city.items.influence = new Item("influence", 0, true, false);
+                        }
+                    },
+                    {
+                        callBack: "onProduce", //onStart onProduce onBuild
+                        onCall: function () {
+                            var effect = Math.max(0, Math.floor(((this.city.items["influence"].amount / this.influencedLand) - this.influencedLand)));
+                            if (effect != NaN) {
+                                this.influencedLand += effect;
+                                this.land += effect;
+                            }
+
+                        }
+                    },
+                ], //Put functions inside of here to create more functionality.
+                uIList: [
+                    {
+                        effectName: "SubEffect",
+                        name: "land",
+                        onSet: function () { return ["Available Land Area : ", this.land] }
+                    },
+                    {
+                        effectName: "SubEffect",
+                        name: "influence",
+                        onSet: function () { return ["Influence Accrued in surrounding areas :", this.city.items["influence"].amount] }
+                    }
+                ], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
+        //#region waterManagement
+        this.waterManagement = new Project(
+            {
+                projectName: "Water Management", //Displayed name.
+                projectDescription: "An overview of the wells and other sources of water that provide the city with what it needs to survive.", //The displayed description of the project.
+                nameOfAmount: "Wells", //The name of each individual purchase.
+                projectId: "waterManagement", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: 2, //The column which this is put into.
+                unpurchasable: true, //Will hide the amount and buy button elements if false.
+                jobList: [
+                    { name: "civil", exName: "Water Carrier", amount: 1, production: [new ItemRef("water", 1)] }
+                ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [], //Put a Ref in to tell it what this costs. 
+                functionsList: [], //Put functions inside of here to create more functionality.
+                uIList: [], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
+        //#region farm
+        this.farm = new Project(
+            {
+                projectName: "Farm", //Displayed name.
+                projectDescription: "A plot of land worked by a farmer to feed themselves and the city.", //The displayed description of the project.
+                nameOfAmount: "Fields", //The name of each individual purchase.
+                projectId: "farm", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: 1, //The column which this is put into.
+                unpurchasable: false, //Will hide the amount and buy button elements if false.
+                jobList: [
+                    { name: "farmers", exName: "Farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [
+                    new ItemRef("wood", 10)
+                ], //Put a Ref in to tell it what this costs. 
+                functionsList: [], //Put functions inside of here to create more functionality.
+                uIList: [], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        this.farm.onBuild(4);
+        //#endregion
+        //#region Housing
+        this.housing = new Project(
+            {
+                projectName: "Housing", //Displayed name.
+                projectDescription: "Where the citizens live, and some work. Allows you to grow your population with surplus food. Population will only try to grow if there is surplus food.", //The displayed description of the project.
+                nameOfAmount: "Houses", //The name of each individual purchase.
+                projectId: "housing", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: 2, //The column which this is put into.
+                unpurchasable: true, //Will hide the amount and buy button elements if false.
+                jobList: [], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [
+                    new ItemRef("wood", 10)
+                ], //Put a Ref in to tell it what this costs. 
+                functionsList: [
+                    {
+                        callBack: "onStart", //onStart onProduce onBuild
+                        onCall: function () {
+                            this.growthRate = 3;
+                        }
+                    },
+                    {
+                        callBack: "onProduce",
+                        onCall: function () {
+                            if (this.storedFood == undefined) {
+                                this.storedFood = 0;
+                            }
+                            if (this.city.items["food"].addRate() > 0) {
+                                this.storedFood += Math.floor(this.city.items["food"].amount * (this.growthRate / 100));
+                            }
+                            if (this.storedFood > this.city.population.sum()) {
+                                this.storedFood -= this.city.population.sum();
+                                this.city.population["unemployed"].amount += 1;
+                            }
+                        }
+                    }
+                ], //Put functions inside of here to create more functionality.
+                uIList: [
+                    {
+                        effectName: "SubEffect",
+                        name: "Growth",
+                        onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] }
+                    },
+                    {
+                        effectName: "SubEffect",
+                        name: "GrowthRate",
+                        onSet: function () { return ["Growth rate: ", this.growthRate + "% of stored food"] }
+                    }
+                ], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
+        //#region woodlands
+        this.woodlands = new Project(
+            {
+                projectName: "Woodlands", //Displayed name.
+                projectDescription: "A few small forests on the outskirts of the city which supply us lumber. We can slowly reclaim the land by chopping it down and building there. Giving it plenty of surplus land will allow it to regrow.", //The displayed description of the project.
+                nameOfAmount: "Acres", //The name of each individual purchase.
+                projectId: "woodlands", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: 1, //The column which this is put into.
+                unpurchasable: true, //Will hide the amount and buy button elements if false.
+                jobList: [
+                    { name: "laborers", exName: "Laborers", amount: 1, production: [new ItemRef("wood", 1)] }
+                ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [
+                    new ItemRef("food", 25)
+                ], //Put a Ref in to tell it what this costs. 
+                functionsList: [
+                    {
+                        callBack: "onStart",
+                        onCall: function () {
+                            this.totalWood = 10000;
+                            this.nextLand = 0;
+                        }
+                    },
+                    {
+                        callBack: "onProduce",
+                        onCall: function () {
+                            this.totalWood -= this.lastProduced;
+                            this.nextLand += this.lastProduced;
+
+                            if (this.totalWood <= 0) {
+                                this.efficiency = 0;
+                            }
+
+                            if (this.nextLand >= 50) {
+                                //Increase Land by 1.
+                                this.land.land += 1;
+                                this.nextLand -= 10;
+                            }
+                        }
+                    }
+                ], //Put functions inside of here to create more functionality.
+                uIList: [
+                    {
+                        effectName: "SubEffect",
+                        name: "totalWood",
+                        onSet: function () { return ["Harvestable Wood : ", this.totalWood] }
+                    }
+                ], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
+        //#region marketQuarter
+        this.marketQuarter = new Project(
+            {
+                projectName: "Market Quarter", //Displayed name.
+                projectDescription: "A central section of the city which allows merchants to set up stalls. They usually occur once or twice weekly and allow citizens to buy food and luxuries.", //The displayed description of the project.
+                nameOfAmount: "Stalls", //The name of each individual purchase.
+                projectId: "marketQuarter", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: 2, //The column which this is put into.
+                unpurchasable: true, //Will hide the amount and buy button elements if false.
+                jobList: [
+                    { name: "merchants", exName: "Food Merchant", amount: 1, production: [new ItemRef("food", 3), new ItemRef("gold", -1), new ItemRef("influence", 1)], merchant: true },
+                    { name: "merchants", exName: "Wood Merchant", amount: 1, production: [new ItemRef("wood", 3), new ItemRef("gold", -1), new ItemRef("influence", 1)], merchant: true, duplicate: true }
+
+                ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [
+                    new ItemRef("wood", 5)
+                ], //Put a Ref in to tell it what this costs. 
+                functionsList: [
+                    {
+                        callBack: "onStart",
+                        onCall: function () {
+                        }
+                    }
+                ], //Put functions inside of here to create more functionality.
+                uIList: [], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
+
     }
+
+    //#region methods
+    //Unlock method which uses certain keywords to unlock projects such as "workshop" would require a workshop to be built etc.
 
     produce() {
         this.producers.forEach(pro => pro());
@@ -22,7 +273,12 @@ class Projects {
     checkCosts(costList) {
         var canBuy = true;
         costList.forEach((cos) => {
-            if (this.city.items[cos.itemName].amount < Math.abs(cos.itemAmount)) {
+            if (cos.name == "land") {
+                if (this.city.projects.landManagement.land < Math.abs(cos.amount)) {
+                    canBuy = false;
+                }
+            }
+            else if (this.city.items[cos.name].amount < Math.abs(cos.amount)) {
                 canBuy = false;
             }
         })
@@ -33,7 +289,12 @@ class Projects {
         var canBuy = this.checkCosts(costList);
         if (canBuy == true) {
             costList.forEach((cos) => {
-                this.city.items[cos.itemName].subtract(cos.itemAmount);
+                if (cos.name == "land") {
+                    this.city.projects.landManagement.land -= cos.amount;
+                }
+                else {
+                    this.city.items[cos.name].subtract(cos.amount);
+                }
             })
             return true;
         }
@@ -42,22 +303,10 @@ class Projects {
         }
     }
 
-    build(project) {
-        var canBuild = project.projects.applyCosts(project.cost);
-        if (canBuild == true) {
-            project.jobs.forEach((job) => {
-                job.jobMax += job.jobGrowth;
-                job.hire();
-            });
-        }
-        return canBuild;
-    }
-
     refineDelta(prodList, workerList, amount, city) {
         var delta;
         prodList.forEach((pro) => {
             if (pro.amount < 0) {
-
                 if (delta == undefined) {
                     delta = Math.floor(city.items[pro.name].amount / Math.abs(pro.amount));
 
@@ -66,7 +315,6 @@ class Projects {
                     delta = Math.floor(Math.min(delta, city.items[pro.name].amount / Math.abs(pro.amount)));
 
                 }
-
             }
             else if (prodList.length == prodList.indexOf(pro) + 1) {
                 delta = amount;
@@ -81,42 +329,8 @@ class Projects {
         delta = Math.min(amount, delta);
         return delta;
     }
+    //#endregion
 
-}
-
-class VariableBlock {
-    variables = [];
-    constructor(city, projects) {
-        this.city = city;
-        this.projects = projects;
-    }
-
-    job(name, amount) {
-        if (this[name] == undefined) {
-            this.variables.push(this[name] = new JRef(this.city, name, amount));
-        }
-        else {
-            this[name].amount += amount;
-        }
-    }
-
-    cost(name, amount) {
-        if (this[name] == undefined) {
-            this.variables.push(this[name] = new Ref(name, amount));
-        }
-        else {
-            this[name].amount += amount;
-        }
-    }
-
-    cost(name, amount) {
-        if (this[name] == undefined) {
-            this.variables.push(this[name] = new PRef(name, amount));
-        }
-        else {
-            this[name].amount += amount;
-        }
-    }
 }
 
 class ItemDisplay {
@@ -131,256 +345,147 @@ class ItemDisplay {
         var cityItems = this.city.items;
         for (var i in cityItems) {
             var item = cityItems[i];
-            if (item.constructor == cityItems["gold"].constructor) {
+            if (item.displayInStocks == true) {
                 uIManager.subEffect(this.elements, "itemDisplay" + item.name, function () { return [this.name, " :", this.amount + " + per day : " + this.addRate()] }.bind(item), "itemDisplay");
             }
         }
     }
 }
 
-class WheatFarm {
-    name = "Wheat Farm";
-    description = "A plot of land to produce small amounts of wheat, can hardly be described as a farm for now. Harvest occurs during the Harvest season, otherwise the fields will slowly grow wheat to be harvested.";
+class Project {
+    //#region stats
+    efficiency = 1;
+    amount = 0;
+    lastProduced = 0;
+    //#endregion
 
-    //Stats
-    fields = 0;
-    growthRate = 1;
-    growingWheat = 0;
-    irrigation = 1;
+    constructor(conObj) {
 
-    constructor(city, projects) {
-        this.projects = projects; //The projects which this belongs to.
-        this.elements = projects.elements; //The shared elements list which all projects of the same city share.
-        this.city = city; //The city which this project belongs to.
-        this.jobs = [
-            new JRef(this.city, "farmers", 1)
-        ]
-        this.cost = [
-            new Ref("wood", 5, 0)
-        ]
-        //Create the UI elements which display everything.
-        uIManager.shell(this.elements, "wheatFarmShell");
-        uIManager.dropDown(this.elements, "wheatFarm", this.name, "wheatFarmShell");
-        uIManager.subEffect(this.elements, "wheatFarmDesc", function () { return [this.description] }.bind(this), "wheatFarm");
-        uIManager.effectHeader(this.elements, "wheatFarmStats", "Stats", "wheatFarm");
-        uIManager.subEffect(this.elements, "wheatFarmFields", function () { return ["Fields :", this.fields] }.bind(this), "wheatFarmStats");
-        uIManager.subEffect(this.elements, "wheatFarmInField", function () { return ["Wheat in fields :", this.growingWheat] }.bind(this), "wheatFarmStats");
-        uIManager.effectHeader(this.elements, "wheatFarmProduction", "Produces", "wheatFarm");
-        uIManager.subEffect(this.elements, "wheatFarmWheatProduction", function () { return ["Growing rate :" + this.growthRate * this.irrigation] }.bind(this), "wheatFarmProduction");
-        uIManager.refEffect(this.elements, "wheatFarmTestRef", "Costs", function () { return this.cost }.bind(this), "wheatFarm");
-        uIManager.workerEffect(this.elements, "wheatFarmWorkers", "Workers", this.jobs, "wheatFarm");
-        uIManager.buildButton(this.elements, "wheatFarmBuy", function () { if (this.projects.build(this)) { this.onBuild() } }.bind(this), "wheatFarm");
+        this.name = conObj.name; //Name of the project.
+        this.description = conObj.projectDescription; //Description of the project.
+        this.nameOfAmount = conObj.nameOfAmount;
+        this.projects = conObj.projects; //The projects which this belongs to.
+        this.elements = conObj.projects.elements; //The shared elements list which all projects of the same city share.
+        this.city = conObj.city; //The city which this project belongs to.
+        var projectId = conObj.projectId;
+        this.projectId = projectId;
+        this.efficiency = conObj.baseEfficiency;
+        this.column = conObj.column;
+        this.unpurchasable = conObj.unpurchasable;
+        this.land = conObj.projects["landManagement"];
+        //A list of JRefs() which determine which workers make what.
+        this.jobs = [];
+        conObj.jobList.forEach((job) => {
+            this.editJobs(job);
+        })
+        //A list of Ref() which tells it what it costs to make.
+        this.costs = conObj.costList;
+        this.buildFunctions = []
+        this.produceFunctions = []
+        conObj.functionsList.forEach((fun) => {
+            if (fun.callBack == "onBuild") {
+                this.buildFunctions.push(fun.onCall.bind(this));
+            }
+            else if (fun.callBack == "onProduce") {
+                this.produceFunctions.push(fun.onCall.bind(this));
+            }
+            else if (fun.callBack == "onStart") {
+                fun.onCall.bind(this)();
+            }
+        })
 
-        this.projects.producers.push(this.onProduce.bind(this));//Pushes the OnProduce function to Projects, bound to this.
+        //#region UI creation. Use uIManager to create effects.
+        uIManager.shell(this.elements, projectId + "Shell", undefined, undefined, this.column); //Creates the shell which all other UI goes into.
+        uIManager.dropDown(this.elements, projectId, this.name, projectId + "Shell");
+        uIManager.subEffect(this.elements, projectId + "Desc", function () { return [this.description] }.bind(this), projectId);
+        this.amountEffect = uIManager.subEffect(this.elements, projectId + "Amount", function () { return [this.nameOfAmount + " : " + this.amount] }.bind(this), projectId);
+        //#region UI effects
+        conObj.uIList.forEach((uI) => {
+            if (uI.effectName == "SubEffect") {
+                uIManager.subEffect(this.elements, projectId + uI.name, uI.onSet.bind(this), projectId);
+            }
+        })
+        //#endregion
+        uIManager.jobRefEffect(this.elements, projectId, "Workers", this.jobs, projectId)
+        this.costsRef = uIManager.refEffect(this.elements, projectId + "Costs", "Costs", function () { return this.costs }.bind(this), projectId);
+        this.buyButton = uIManager.buildButton(this.elements, projectId + "Buy", function () { if (this.projects.applyCosts(this.costs)) { this.onBuild() } }.bind(this), projectId);
+        if (this.unpurchasable == false) {
+            this.buyButton.closeButton();
+            this.amountEffect.closeEffect();
+            this.costsRef.close();
+        }
+        else {
+            this.buyButton.openButton();
+            this.amountEffect.openEffect();
+            this.costsRef.open();
+        }
+        //#endregion
+
+        //Tells the Projects to activate this when the production Callback happens. Delete this and onProduce to disable.
+        this.projects.producers.push(this.onProduce.bind(this));
     }
 
-    onBuild() {//Code which is called by BuildButton if you can afford it.
-        this.fields += 1;
-    }
-
-    onProduce() { //The method that is called each day.
-        this.growingWheat += this.growthRate * this.irrigation * this.jobs[0].multiplyByJobsRatio(this.fields);
-        if (this.city.weather.season == "harvest") {
-            this.city.items.wheat.add(this.growingWheat);
-            this.growingWheat = 0;
+    onBuild(amount = 1) {//Code which is called by BuildButton if you can afford it.
+        amount = Math.min(this.land.land, amount);
+        for (let index = 0; index < amount; index++) {
+            this.amount += 1;
+            this.land.land -= 1;
+            this.jobs.forEach(job => job.onBuild());
+            this.buildFunctions.forEach(fun => fun());
         }
     }
-}
-
-class Granary {
-    name = "Granary"; //Name of the project.
-    description = "Turns wheat into food."; //Description of the project.
-
-    //#region stats
-    amount = 0;
-    workRate = 0;
-    //#endregion
-
-    constructor(city, projects) {
-        this.projects = projects; //The projects which this belongs to.
-        this.elements = projects.elements; //The shared elements list which all projects of the same city share.
-        this.city = city; //The city which this project belongs to.
-        //A list of JRef() which tell it which workers to use.
-        this.jobs = [
-            this.civil = new JRef(city, "civil", 1)
-        ]
-        //A list of Ref() which tell it what it costs to make.
-        this.cost = [
-            this.woodCost = new Ref("wood", 10),
-            this.goldCost = new Ref("gold", 3)
-        ]
-        this.produces = [
-            this.foodProd = new PRef("food", 5),
-            this.wheatProd = new PRef("wheat", -5)
-        ]
-
-        //#region UI creation. Use uIManager to create effects.
-        uIManager.shell(this.elements, "granaryShell", undefined, undefined, 2); //Creates the shell which all other UI goes into.
-        uIManager.dropDown(this.elements, "granary", this.name, "granaryShell");
-        uIManager.subEffect(this.elements, "granaryDesc", function () { return [this.description] }.bind(this), "granary");
-        uIManager.effectHeader(this.elements, "granaryStats", "Stats", "granary");
-        uIManager.subEffect(this.elements, "granaryAmount", function () { return ["Granaries :", this.amount] }.bind(this), "granaryStats");
-
-        uIManager.productionEffect(this.elements, "granaryProduction", "Production", this.produces, "granary");
-        uIManager.refEffect(this.elements, "granaryCost", "Cost", function () { return this.cost }.bind(this), "granary");
-        uIManager.workerEffect(this.elements, "granaryWorkers", "Workers", this.jobs, "granary");
-
-
-        //#endregion
-        uIManager.buildButton(this.elements, "granaryBuy", function () { if (this.projects.build(this)) { this.onBuild() } }.bind(this), "granary");
-        //#endregion
-
-        //Tells the Projects to activate this when the production Callback happens. Delete this and onProduce to disable.
-        this.projects.producers.push(this.onProduce.bind(this));
-    }
-
-    onBuild() {//Code which is called by BuildButton if you can afford it.
-        this.amount += 1;
-    }
 
     onProduce() {//Called at the end of each day by projects.producers.
-        this.foodProd.produce(this.city, this.projects.refineDelta(this.produces, this.jobs, this.amount, this.city));
-        this.wheatProd.produce(this.city, this.projects.refineDelta(this.produces, this.jobs, this.amount, this.city));
+        this.jobs.forEach(job => job.produce());
+        this.produceFunctions.forEach(fun => fun());
+
+        if (this.unpurchasable == false) {
+            this.buyButton.closeButton();
+            this.amountEffect.closeEffect();
+            this.costsRef.close();
+        }
+        else {
+            this.buyButton.openButton();
+            this.amountEffect.openEffect();
+            this.costsRef.open();
+        }
     }
 
+    editJobs(jobObj) {
+        var emptyList = true;
+        this.jobs.forEach((job) => {
+            emptyList = false;
+            if (job.name == jobObj.name && jobObj.duplicate != true) {
+                job.growth += jobObj.amount;
+                if (jobObj.production != undefined) {
+                    job.productList.forEach((pro) => {
+                        var index = job.productList.indexOf(pro);
+                        if (pro.name == jobObj.production[index].name) {
+                            pro.amount += jobObj.production[index].amount;
+                            console.log("exists");
+                        }
+                        else {
+                            job.productList.push(jobObj.production[index]);
+                        }
+                    })
 
-}
+                }
+            }
+            else {
+                var ref = new JRef(this.city, this, jobObj.name, jobObj.exName, jobObj.amount, jobObj.production);
+                if (jobObj.merchant == true) {
+                    ref.merchant = true;
+                }
+                this.jobs.push(ref);
+            }
+        })
 
-class LumberCamp {
-    name = "Lumber camp"; //Name of the project.
-    description = "Cuts down and refines trees so they can be made into furniture and housing."; //Description of the project.
-
-    //#region stats
-    amount = 0;
-    //#endregion
-
-    constructor(city, projects) {
-        this.projects = projects; //The projects which this belongs to.
-        this.elements = projects.elements; //The shared elements list which all projects of the same city share.
-        this.city = city; //The city which this project belongs to.
-        //A list of JRef() which tell it which workers to use.
-        this.jobs = [new JRef(city, "laborers", 1)]
-        //A list of Ref() which tell it what it costs to make.
-        this.cost = [
-            this.foodCost = new Ref("food", 10)
-        ]
-        this.produces = [
-            this.woodProd = new PRef("wood", 5)
-        ]
-
-        //#region UI creation. Use uIManager to create effects.
-        uIManager.shell(this.elements, "lumberCampShell"); //Creates the shell which all other UI goes into.
-        uIManager.dropDown(this.elements, "lumberCamp", this.name, "lumberCampShell");
-        uIManager.subEffect(this.elements, "lumberCampDesc", function () { return [this.description] }.bind(this), "lumberCamp");
-        uIManager.effectHeader(this.elements, "lumberCampStats", "Stats", "lumberCamp");
-        uIManager.subEffect(this.elements, "lumberCampAmount", function () { return ["Lumber camps :", this.amount] }.bind(this), "lumberCampStats");
-        uIManager.productionEffect(this.elements, "lumberCampProduction", "Production", this.produces, "lumberCamp");
-        uIManager.refEffect(this.elements, "lumberCampCost", "Cost", function () { return this.cost }.bind(this), "lumberCamp");
-        uIManager.workerEffect(this.elements, "lumberCampWorkers", "Workers", this.jobs, "lumberCamp");
-        //#region UI effects
-
-        //#endregion
-        uIManager.buildButton(this.elements, "lumberCampBuy", function () { if (this.projects.build(this)) { this.onBuild() } }.bind(this), "lumberCamp");
-        //#endregion
-
-        //Tells the Projects to activate this when the production Callback happens. Delete this and onProduce to disable.
-        this.projects.producers.push(this.onProduce.bind(this));
-    }
-
-    onBuild() {//Code which is called by BuildButton if you can afford it.
-        this.amount += 1;
-    }
-
-    onProduce() {//Called at the end of each day by projects.producers.
-        this.woodProd.produce(this.city, this.projects.refineDelta(this.produces, this.jobs, this.amount, this.city));
-    }
-
-
-}
-
-class Housing {
-    name = "Housing"; //Name of the project.
-    description = "Housing for your citizens."; //Description of the project.
-
-    //#region stats
-    amount = 0;
-    baseCapacity = 2;
-    //#endregion
-
-    constructor(city, projects) {
-        this.projects = projects; //The projects which this belongs to.
-        this.elements = projects.elements; //The shared elements list which all projects of the same city share.
-        this.city = city; //The city which this project belongs to.
-        //A list of JRef() which tells it which workers to use.
-        this.jobs = []
-        //A list of Ref() which tells it what it costs to make.
-        this.cost = [new Ref("wood", 10)]
-        //A list of PRef() which tells it what to produce, Positive numbers produce it, and negative cost i.
-        this.produces = []
-
-        //#region UI creation. Use uIManager to create effects.
-        uIManager.shell(this.elements, "housingShell", undefined, undefined, 2); //Creates the shell which all other UI goes into.
-        uIManager.dropDown(this.elements, "housing", this.name, "housingShell");
-        uIManager.subEffect(this.elements, "housingDesc", function () { return [this.description] }.bind(this), "housing");
-        //#region UI effects
-        uIManager.effectHeader(this.elements, "housingStats", "Stats", "housing");
-        uIManager.subEffect(this.elements, "housingAmount", function () { return ["Houses : ", this.amount] }.bind(this), "housingStats");
-        uIManager.subEffect(this.elements, "housingCitizens", function () { return ["Citizens : ", this.baseCapacity * this.amount] }.bind(this), "housing");
-
-        //#endregion
-        uIManager.buildButton(this.elements, "housingBuy", function () { if (this.projects.build(this)) { this.onBuild() } }.bind(this), "housing");
-        //#endregion
-
-        //Tells the Projects to activate this when the production Callback happens. Delete this and onProduce to disable.
-        this.projects.producers.push(this.onProduce.bind(this));
-    }
-
-    onBuild() {//Code which is called by BuildButton if you can afford it.
-        this.amount += 1;
-        this.city.population.unemployed.amount += this.baseCapacity;
-    }
-
-    onProduce() {//Called at the end of each day by projects.producers.
-    }
-}
-
-class Workshop {
-    name = "Workshop"; //Name of the project.
-    description = "Extensions onto the single family houses of skilled craftsmen."; //Description of the project.
-
-    //#region stats
-    hammerGoodness = 0;
-    //#endregion
-
-    constructor(city, projects) {
-        this.projects = projects; //The projects which this belongs to.
-        this.elements = projects.elements; //The shared elements list which all projects of the same city share.
-        this.city = city; //The city which this project belongs to.
-        //A list of JRef() which tells it which workers to use.
-        this.jobs = [new JRef(city, "craftsmen", 1)]
-        //A list of Ref() which tells it what it costs to make.
-        this.cost = []
-        //A list of PRef() which tells it what to produce, Positive numbers produce it, and negative cost it.
-        this.produces = []
-
-        //#region UI creation. Use uIManager to create effects.
-        uIManager.shell(this.elements, "workshopShell", undefined, undefined, 2); //Creates the shell which all other UI goes into.
-        uIManager.dropDown(this.elements, "workshop", this.name, "workshopShell");
-        uIManager.subEffect(this.elements, "workshopDesc", function () { return [this.description] }.bind(this), "workshop");
-        //#region UI effects
-
-        //#endregion
-        uIManager.buildButton(this.elements, "workshopBuy", function () { if (this.projects.build(this)) { this.onBuild() } }.bind(this), "workshop");
-        //#endregion
-
-        //Tells the Projects to activate this when the production Callback happens. Delete this and onProduce to disable.
-        this.projects.producers.push(this.onProduce.bind(this));
-    }
-
-    onBuild() {//Code which is called by BuildButton if you can afford it.
-
-    }
-
-    onProduce() {//Called at the end of each day by projects.producers.
+        if (emptyList == true) {
+            var ref = new JRef(this.city, this, jobObj.name, jobObj.exName, jobObj.amount, jobObj.production);
+            if (jobObj.merchant == true) {
+                ref.merchant = true;
+            }
+            this.jobs.push(ref);
+        }
     }
 }

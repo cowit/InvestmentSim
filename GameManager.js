@@ -16,6 +16,7 @@ let dayManager = {
         gameManager.focusCity.projects.produce();
         gameManager.focusCity.weather.updateWeather();
         gameManager.focusCity.population.dailyConsumption();
+        upgradeManager.unlockUpgrades(gameManager.focusCity);
     },
     updateTimer: function () {
         gameManager.focusCity.updateDisplay();

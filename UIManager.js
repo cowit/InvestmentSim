@@ -82,12 +82,14 @@ let uIManager = {
             effectsWrapper.id = id;
             effectsWrapper.className = "project shell";
             parentList.push(new Shell(name, description, title, projectName, projectDesc, effectsWrapper));
+            return effectsWrapper;
         }
         else {
             const title = document.querySelector("#" + id + "Title");
             const projectName = document.querySelector("#" + id + "ProjectName");
             const projectDesc = document.querySelector("#" + id + "ProjectDesc");
             parentList.push(new Shell(name, description, title, projectName, projectDesc, effectsWrapper));
+            return effectsWrapper;
         }
     },
     buildButton: function (parentList, id, onClick, attachTo) {
@@ -149,7 +151,6 @@ let uIManager = {
             const n = document.createElement("p");
             sE.id = id; //Sets the ID of the element
             n.id = "name" + id;
-            document.querySelector("#" + attachTo).append(document.createElement("br"));
             document.querySelector("#" + attachTo).append(sE); //Appends to the attachTo element.
             sE.append(n);
             sE.className = "subEffect";
@@ -157,7 +158,9 @@ let uIManager = {
             element = sE; //Sets the element to the newly created one.
             nameElement = n;
         }
-        parentList.push(new RefEffect(func, name, nameElement, element)); //Actually creates the new subEffect so it can be set by the Subscriber.
+        var returned = new RefEffect(func, name, nameElement, element);
+        parentList.push(returned); //Actually creates the new subEffect so it can be set by the Subscriber.
+        return returned;
     },
     workerEffect: function (parentList, id, name, jobList, attachTo) {
         var wrapper = document.querySelector("#" + id);
@@ -215,28 +218,28 @@ class JobRefEffect {
         }
 
         this.jobList.forEach((job) => {
-            if (this.elements[job.name] != undefined) {
+            if (this.elements[job.exName] != undefined) {
 
-                this.elements[job.name].set(job);
+                this.elements[job.exName].set(job);
             }
             else {
                 var ref = new JRERef();
                 ref.wrapper = document.createElement("div");
                 this.wrapperElement.append(ref.wrapper);
-                ref.plusButton = document.createElement("div");
-                ref.plusButton.textContent = "+";
-                ref.plusButton.className = "workerButton";
-                ref.wrapper.append(ref.plusButton);
                 ref.minusButton = document.createElement("div");
                 ref.minusButton.textContent = "-";
                 ref.minusButton.className = "workerButton";
                 ref.wrapper.append(ref.minusButton);
+                ref.plusButton = document.createElement("div");
+                ref.plusButton.textContent = "+";
+                ref.plusButton.className = "workerButton";
+                ref.wrapper.append(ref.plusButton);
                 ref.popDisplay = document.createElement("p");
                 ref.popDisplay.className = "popDisplay";
                 ref.wrapper.append(ref.popDisplay);
                 ref.plusButton.addEventListener("click", job.hire.bind(job));
                 ref.minusButton.addEventListener("click", job.fire.bind(job));
-                this.elements[job.name] = ref;
+                this.elements[job.exName] = ref;
             }
         })
 
@@ -250,10 +253,25 @@ class JRERef {
     minusButton;
     popDisplay;
     productElements = [];
+    buying;
 
     set(jobRef) {
-        this.popDisplay.textContent = jobRef.name + " : " + jobRef.amount + " / " + jobRef.max;
+        this.popDisplay.textContent = jobRef.exName + " : " + jobRef.amount + " / " + jobRef.max;
         var index = 0;
+        if (this.buying == undefined) {
+            this.buying = document.createElement("p");
+            this.wrapper.append(this.buying);
+            this.buying.textContent = "Buying";
+        }
+        else if (jobRef.merchant != true) {
+            this.buying.textContent = "";
+        }
+        else if (jobRef.buying == true) {
+            this.buying.textContent = "Buying";
+        }
+        else {
+            this.buying.textContent = "Selling";
+        }
         jobRef.productList.forEach((pro) => {
 
             if (this.productElements[index] != undefined) {
@@ -262,6 +280,7 @@ class JRERef {
             else {
                 var proPara = document.createElement("p");
                 this.wrapper.append(proPara);
+                this.wrapper.className = "workerWrapper";
                 proPara.textContent = pro.name + " : " + pro.amount;
                 this.productElements.push(proPara);
             }
@@ -387,6 +406,14 @@ class RefEffect {
 
     }
 
+    open() {
+        this.element.className = "open";
+    }
+
+    close() {
+        this.element.className = "close";
+    }
+
     set() {
         var checkList = this.listFunction();
         if (checkList.length == 0) {
@@ -400,16 +427,13 @@ class RefEffect {
             var i = checkList.indexOf(ref);
             if (this.refList.length == i) {
                 var par = document.createElement("p");
-                par.textContent = ref.itemName + " : " + ref.itemAmount;
+                par.textContent = ref.name + " : " + ref.amount;
                 this.refList.push(par)
                 this.element.append(par);
                 par.append(document.createElement("br"));
             }
-            else if (ref.itemRate == 0) {
-                this.refList[i].textContent = ref.itemName + " : " + ref.itemAmount;
-            }
             else {
-                this.refList[i].textContent = ref.itemName + " : " + ref.itemAmount + " every " + ref.itemRate + " day";
+                this.refList[i].textContent = ref.name + " : " + ref.amount;
             }
         });
         if (this.refList.length > checkList.length) {
