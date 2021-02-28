@@ -10,7 +10,6 @@ class City {
     maxTraders; //The amount of traders that can come from this city.
 
     //Modifiers
-    traderSpeed;
     constructor(name) {
         this.name = name;
     }
