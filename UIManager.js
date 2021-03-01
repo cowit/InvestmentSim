@@ -20,7 +20,7 @@ let uIManager = {
             const n = document.createElement("p");
             eH.id = id;
             n.id = "name" + id;
-            document.querySelector("#" + attachTo).append(document.createElement("br"));
+            //document.querySelector("#" + attachTo).append(document.createElement("br"));
             document.querySelector("#" + attachTo).append(eH);
             eH.append(n);
             n.className = "effect projectName";
@@ -81,15 +81,17 @@ let uIManager = {
             title.append(effectsWrapper);
             effectsWrapper.id = id;
             effectsWrapper.className = "project shell";
-            parentList.push(new Shell(name, description, title, projectName, projectDesc, effectsWrapper));
-            return effectsWrapper;
+            var returnShell = new Shell(name, description, title, projectName, projectDesc, effectsWrapper);
+            parentList.push(returnShell);
+            return returnShell;
         }
         else {
             const title = document.querySelector("#" + id + "Title");
             const projectName = document.querySelector("#" + id + "ProjectName");
             const projectDesc = document.querySelector("#" + id + "ProjectDesc");
-            parentList.push(new Shell(name, description, title, projectName, projectDesc, effectsWrapper));
-            return effectsWrapper;
+            var returnShell = new Shell(name, description, title, projectName, projectDesc, effectsWrapper);
+            parentList.push(returnShell);
+            return returnShell;
         }
     },
     buildButton: function (parentList, id, onClick, attachTo) {
@@ -334,6 +336,14 @@ class Shell {
         this.nameE = nameE;
         this.descE = descE;
         this.wrapperE = wrapperE;
+    }
+
+    open() {
+        this.wrapperE.className = "project shell";
+    }
+
+    close() {
+        this.wrapperE.className = "close";
     }
 
     set() {

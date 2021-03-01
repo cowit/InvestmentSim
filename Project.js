@@ -91,6 +91,7 @@ class Projects {
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
                 column: 1, //The column which this is put into.
                 unpurchasable: false, //Will hide the amount and buy button elements if false.
+                unlocked: true,
                 jobList: [
                     { name: "farmers", exName: "Farmers", amount: 1, production: [new ItemRef("food", 1)] }
                 ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
@@ -118,6 +119,7 @@ class Projects {
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
                 column: 2, //The column which this is put into.
                 unpurchasable: true, //Will hide the amount and buy button elements if false.
+                unlocked: true,
                 jobList: [], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
                 costList: [
                     new ItemRef("wood", 10)
@@ -340,7 +342,7 @@ class ItemDisplay {
         this.elements = projects.elements;
         this.city = city;
         uIManager.shell(this.elements, "itemDisplayShell", undefined, undefined, 2);
-        uIManager.dropDown(this.elements, "itemDisplay", "Stocks", "itemDisplayShell");
+        uIManager.dropDown(this.elements, "itemDisplay", "Stockpile", "itemDisplayShell");
         uIManager.subEffect(this.elements, "itemDisplayDesc", function () { return ["The items stored within the city"] }.bind(this), "itemDisplay");
         var cityItems = this.city.items;
         for (var i in cityItems) {
@@ -360,7 +362,12 @@ class Project {
     //#endregion
 
     constructor(conObj) {
-
+        if (conObj.unlocked == true) {
+            this.unlocked = true;
+        }
+        else {
+            this.unlocked = false;
+        }
         this.name = conObj.projectName; //Name of the project.
         this.description = conObj.projectDescription; //Description of the project.
         this.nameOfAmount = conObj.nameOfAmount;
@@ -395,7 +402,7 @@ class Project {
         })
 
         //#region UI creation. Use uIManager to create effects.
-        uIManager.shell(this.elements, projectId + "Shell", undefined, undefined, this.column); //Creates the shell which all other UI goes into.
+        this.shell = uIManager.shell(this.elements, projectId + "Shell", undefined, undefined, this.column); //Creates the shell which all other UI goes into.
         uIManager.dropDown(this.elements, projectId, this.name, projectId + "Shell");
         uIManager.subEffect(this.elements, projectId + "Desc", function () { return [this.description] }.bind(this), projectId);
         this.amountEffect = uIManager.subEffect(this.elements, projectId + "Amount", function () { return [this.nameOfAmount + " : " + this.amount] }.bind(this), projectId);
@@ -436,19 +443,29 @@ class Project {
     }
 
     onProduce() {//Called at the end of each day by projects.producers.
-        this.jobs.forEach(job => job.produce());
-        this.produceFunctions.forEach(fun => fun());
+        if (this.unlocked == true) {
+            this.jobs.forEach(job => job.produce());
+            this.produceFunctions.forEach(fun => fun());
 
-        if (this.unpurchasable == false) {
-            this.buyButton.closeButton();
-            this.amountEffect.closeEffect();
-            this.costsRef.close();
+            if (this.unpurchasable == false) {
+                this.buyButton.closeButton();
+                this.amountEffect.closeEffect();
+                this.costsRef.close();
+            }
+            else {
+                this.buyButton.openButton();
+                this.amountEffect.openEffect();
+                this.costsRef.open();
+            }
+        }
+
+        if (this.unlocked == true) {
+            this.shell.open();
         }
         else {
-            this.buyButton.openButton();
-            this.amountEffect.openEffect();
-            this.costsRef.open();
+            this.shell.close();
         }
+
     }
 
     editJobs(jobObj) {

@@ -3,6 +3,7 @@ let gameManager = {
     cities: [],
     initialize: function () {
         dayManager.startTimers();
+        gameManager.focusCity.projects.produce();
     },
     createCity: function (name) {
         newCity = new City(name);
