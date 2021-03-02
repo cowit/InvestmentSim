@@ -1,19 +1,20 @@
 class Items {
     constructor() {
-        this.gold = new Item("gold", 5, true);
-        this.food = new Item("food", 20, true);
-        this.wheat = new Item("wheat", 25, true);
-        this.wood = new Item("wood", 25, true);
-        this.water = new Item("water", 20, true);
+        this.gold = new Item("gold", "Gold", 5, true);
+        this.food = new Item("food", "Food", 20, true);
+        this.wheat = new Item("wheat", "Wheat", 25, true);
+        this.wood = new Item("wood", "Wood", 60, true);
+        this.water = new Item("water", "Water", 20, true);
     }
 }
 
 class Item {
     parent; //What contains this item
     rateList = [];
-    constructor(name, amount, isUnlocked = false, displayInStocks = true) {
+    constructor(name, displayName, amount, isUnlocked = false, displayInStocks = true) {
         this.isUnlocked = isUnlocked; //Defaults to false, Locked items will not be displayed but will exist.
         this.name = name;
+        this.displayName = displayName;
         this.amount = amount;
         this.displayInStocks = displayInStocks;
     }
@@ -155,7 +156,7 @@ class JRef {
                 this.city.population[this.name].amount -= 1;
                 this.city.population["unemployed"].amount += 1;
                 this.amount -= 1;
-                if (this.amount == 0 && this.buying == true) {
+                if (this.amount == 0 && this.buying == true && this.merchant == true) {
                     this.buying = false;
                     this.swap();
                 }

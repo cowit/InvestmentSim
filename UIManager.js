@@ -1,5 +1,5 @@
 let uIManager = {
-    subEffect: function (parentList, id, func, attachTo) {
+    subEffect: function (parentList, id, func, attachTo, addLineBreaks) {
         var element = document.querySelector("#" + id); //Attemps to find the element by ID
         if (element == null) { //If it does not find it.
             const sE = document.createElement("p"); //Creates the paragraph
@@ -8,7 +8,7 @@ let uIManager = {
             sE.className = "subEffect";
             element = sE; //Sets the element to the newly created one.
         }
-        var subClass = new SubEffect(func, element);
+        var subClass = new SubEffect(func, element, addLineBreaks);
         parentList.push(subClass); //Actually creates the new subEffect so it can be set by the Subscriber.
         return subClass;
     },
@@ -277,7 +277,7 @@ class JRERef {
         jobRef.productList.forEach((pro) => {
 
             if (this.productElements[index] != undefined) {
-                this.productElements[index].textContent = pro.name + " : " + (pro.amount * jobRef.project.efficiency);
+                this.productElements[index].textContent = gameManager.focusCity.items[pro.name].displayName + " : " + (pro.amount * jobRef.project.efficiency);
             }
             else {
                 var proPara = document.createElement("p");
@@ -295,9 +295,10 @@ class JRERef {
 }
 
 class SubEffect {
-    constructor(func, element) {
+    constructor(func, element, lineBreaks) {
         this.listFunction = func;
         this.element = element;
+        this.lineBreaks = lineBreaks;
     }
 
     openEffect() {
@@ -309,10 +310,19 @@ class SubEffect {
     }
 
     set() {
-        var text = this.listFunction().join(" ");
-        if (text != undefined || text != "" || text != " ") {
-            this.element.textContent = text;
+        if (this.lineBreaks == true) {
+            var text = this.listFunction().join("\n");
+            if (text != undefined || text != "" || text != " ") {
+                this.element.textContent = text;
+            }
         }
+        else {
+            var text = this.listFunction().join(" ");
+            if (text != undefined || text != "" || text != " ") {
+                this.element.textContent = text;
+            }
+        }
+
     }
 }
 

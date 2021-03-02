@@ -3,7 +3,7 @@ let gameManager = {
     cities: [],
     initialize: function () {
         dayManager.startTimers();
-        gameManager.focusCity.projects.produce();
+        dayManager.advanceDay();
     },
     createCity: function (name) {
         newCity = new City(name);
@@ -42,5 +42,23 @@ let divideResizer = {
             totalWidth = Math.floor(screenWidth / divs);
         }
         document.documentElement.style.setProperty("--resize-Size", (totalWidth - 8) + "px");
+    }
+}
+
+function getItem(itemName) {
+    return gameManager.focusCity.items[itemName];
+}
+
+function getProject(projectName) {
+    //console.log(gameManager.focusCity.projects[projectName]);
+    return gameManager.focusCity.projects[projectName];
+}
+
+function getPop(popName) {
+    if (popName == "total") {
+        return gameManager.focusCity.population.sum();
+    }
+    else {
+        return gameManager.focusCity.population[popName];
     }
 }

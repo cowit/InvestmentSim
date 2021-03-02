@@ -11,7 +11,6 @@ class City {
     //Modifiers
     constructor(name) {
         this.name = name;
-        console.log("Test");
     }
 
     produce() {

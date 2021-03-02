@@ -1,6 +1,5 @@
 :root {
     --main-line-color: rgb(63, 63, 63);
-    --resize-Size: 300px;
     --button-border-color: rgb(39, 39, 39);
 }
 
@@ -40,8 +39,7 @@
     margin-top: 5px;
     box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
     width: 300px;
-    display: flex;
-    flex-direction: column;
+    height: 600px;
     overflow: scroll;
     align-items: center;
     text-align: center;
@@ -57,6 +55,7 @@
 
 .subEffect {
     margin-bottom: 5px;
+    white-space: pre-line;
 }
 
 .workerWrapper {

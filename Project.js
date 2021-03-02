@@ -14,6 +14,7 @@ class Projects {
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
                 column: 2, //The column which this is put into.
                 unpurchasable: false, //Will hide the amount and buy button elements if false.
+                unlocked: false,
                 jobList: [], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
                 costList: [], //Put a Ref in to tell it what this costs. 
                 functionsList: [
@@ -88,7 +89,7 @@ class Projects {
                 projectDescription: "A plot of land worked by a farmer to feed themselves and the city.", //The displayed description of the project.
                 nameOfAmount: "Fields", //The name of each individual purchase.
                 projectId: "farm", //The internal name for the project. Shared with the property name it belongs to.
-                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                baseEfficiency: 0.5, //Base efficiency of the project which effects all output.
                 column: 1, //The column which this is put into.
                 unpurchasable: false, //Will hide the amount and buy button elements if false.
                 unlocked: true,
@@ -113,13 +114,13 @@ class Projects {
         this.housing = new Project(
             {
                 projectName: "Housing", //Displayed name.
-                projectDescription: "Where the citizens live, and some work. Allows you to grow your population with surplus food. Population will only try to grow if there is surplus food.", //The displayed description of the project.
+                projectDescription: "Where the citizens live, and some work. Allows the population to very slowly grow using surplus food.", //The displayed description of the project.
                 nameOfAmount: "Houses", //The name of each individual purchase.
                 projectId: "housing", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
                 column: 2, //The column which this is put into.
-                unpurchasable: true, //Will hide the amount and buy button elements if false.
-                unlocked: true,
+                unpurchasable: false, //Will hide the amount and buy button elements if false.
+                unlocked: false,
                 jobList: [], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
                 costList: [
                     new ItemRef("wood", 10)
@@ -137,7 +138,7 @@ class Projects {
                             if (this.storedFood == undefined) {
                                 this.storedFood = 0;
                             }
-                            if (this.city.items["food"].addRate() > 0) {
+                            if (this.city.items["food"].addRate() > 1) {
                                 this.storedFood += Math.floor(this.city.items["food"].amount * (this.growthRate / 100));
                             }
                             if (this.storedFood > this.city.population.sum()) {
@@ -176,7 +177,7 @@ class Projects {
                 projectId: "woodlands", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
                 column: 1, //The column which this is put into.
-                unpurchasable: true, //Will hide the amount and buy button elements if false.
+                unpurchasable: false, //Will hide the amount and buy button elements if false.
                 jobList: [
                     { name: "laborers", exName: "Laborers", amount: 1, production: [new ItemRef("wood", 1)] }
                 ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
@@ -205,6 +206,10 @@ class Projects {
                                 //Increase Land by 1.
                                 this.land.land += 1;
                                 this.nextLand -= 10;
+                            }
+
+                            if (this.jobs[0].max < this.totalWood / 1000) {
+                                this.onBuild(10);
                             }
                         }
                     }
@@ -348,7 +353,7 @@ class ItemDisplay {
         for (var i in cityItems) {
             var item = cityItems[i];
             if (item.displayInStocks == true) {
-                uIManager.subEffect(this.elements, "itemDisplay" + item.name, function () { return [this.name, " :", this.amount + " + per day : " + this.addRate()] }.bind(item), "itemDisplay");
+                uIManager.subEffect(this.elements, "itemDisplay" + item.name, function () { return [this.displayName, " :", this.amount + " + per day : " + this.addRate()] }.bind(item), "itemDisplay");
             }
         }
     }
