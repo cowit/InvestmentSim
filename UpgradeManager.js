@@ -104,6 +104,22 @@ class UpgradeManager {
             [new ItemRef("food", 50)] /* UpgradeCost */,
             ["global"] //Which cards this effects.
         );
+        this.marketTutorial = new Upgrade(
+            this,
+            "marketTutorial",
+            "Tutorial: Markets",
+            [
+                "Markets are an important tool for managing production and making your city wealthy and influential. One of the keys to fully taking advantage of the market is the fact that gold isn't valuable on it's own.",
+                "The main purpose of gold is to use to buy things that you can use to expand your true wealth (although having a stockpile is not a bad thing!)",
+                "Increasing the amount of merchants for a product will mean they purchase more of it and use an equivalent amount more gold. Decreasing the amount below 0 will instead cause them to sell the item in question and gain gold in exchange.",
+                "Consider selling wood in exchange for food as it has a much better gather rate than farms!",
+                "(PS. markets create influence whether they are buying or selling. You are still becoming more well known when you sell items!)"
+            ], //This will add a line break between each item in the list.
+            function () {
+            },
+            [/*new Ref("wood", 10)*/] /* UpgradeCost */,
+            [/*"workshop"*/] //Which cards this effects.
+        );
         //#endregion
     }
 
@@ -129,6 +145,7 @@ class UpgradeManager {
 
         if (getPop("total") >= 20) {
             this.marketCharter.unlock();
+            this.marketTutorial.unlock();
         }
 
     }
@@ -163,7 +180,7 @@ class Upgrade {
     }
 
     createUI() {
-        this.baseElement = uIManager.shell(this.elements, this.id + "upgradesShell", undefined, undefined, 4).wrapperE;
+        this.baseElement = uIManager.shell(this.elements, this.id + "upgradesShell", undefined, undefined, "upgrades").wrapperE;
         uIManager.dropDown(this.elements, this.id + "dropDown", this.name, this.id + "upgradesShell");
         uIManager.subEffect(this.elements, this.id + "desc", function () { return this.description }.bind(this), this.id + "dropDown", true);
         uIManager.refEffect(this.elements, this.id + "costs", "Costs", function () { return this.costs }.bind(this), this.id + "dropDown");

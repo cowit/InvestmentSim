@@ -12,7 +12,7 @@ class Projects {
                 nameOfAmount: "Projects", //The name of each individual purchase.
                 projectId: "landManagement", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
-                column: 2, //The column which this is put into.
+                column: "stats", //The column which this is put into.
                 unpurchasable: false, //Will hide the amount and buy button elements if false.
                 unlocked: false,
                 jobList: [], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
@@ -23,7 +23,7 @@ class Projects {
                         onCall: function () {
                             this.land = 51;
                             this.influencedLand = 1;
-                            this.city.items.influence = new Item("influence", 0, true, false);
+                            this.city.items.influence = new Item("influence", "Influence", 0, true, false);
                         }
                     },
                     {
@@ -66,7 +66,7 @@ class Projects {
                 nameOfAmount: "Wells", //The name of each individual purchase.
                 projectId: "waterManagement", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
-                column: 2, //The column which this is put into.
+                column: "stats", //The column which this is put into.
                 unpurchasable: true, //Will hide the amount and buy button elements if false.
                 jobList: [
                     { name: "civil", exName: "Water Carrier", amount: 1, production: [new ItemRef("water", 1)] }
@@ -90,7 +90,7 @@ class Projects {
                 nameOfAmount: "Fields", //The name of each individual purchase.
                 projectId: "farm", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 0.5, //Base efficiency of the project which effects all output.
-                column: 1, //The column which this is put into.
+                column: "sLand", //The column which this is put into.
                 unpurchasable: false, //Will hide the amount and buy button elements if false.
                 unlocked: true,
                 jobList: [
@@ -118,7 +118,7 @@ class Projects {
                 nameOfAmount: "Houses", //The name of each individual purchase.
                 projectId: "housing", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
-                column: 2, //The column which this is put into.
+                column: "city", //The column which this is put into.
                 unpurchasable: false, //Will hide the amount and buy button elements if false.
                 unlocked: false,
                 jobList: [], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
@@ -176,7 +176,7 @@ class Projects {
                 nameOfAmount: "Acres", //The name of each individual purchase.
                 projectId: "woodlands", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
-                column: 1, //The column which this is put into.
+                column: "sLand", //The column which this is put into.
                 unpurchasable: false, //Will hide the amount and buy button elements if false.
                 jobList: [
                     { name: "laborers", exName: "Laborers", amount: 1, production: [new ItemRef("wood", 1)] }
@@ -233,15 +233,16 @@ class Projects {
         this.marketQuarter = new Project(
             {
                 projectName: "Market Quarter", //Displayed name.
-                projectDescription: "A central section of the city which allows merchants to set up stalls. They usually occur once or twice weekly and allow citizens to buy food and luxuries.", //The displayed description of the project.
+                projectDescription: "A central section of street in the city which allows merchants to set up stalls. They usually occur once or twice weekly and allow citizens to buy food and luxuries.", //The displayed description of the project.
                 nameOfAmount: "Stalls", //The name of each individual purchase.
                 projectId: "marketQuarter", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
-                column: 2, //The column which this is put into.
+                column: "city", //The column which this is put into.
                 unpurchasable: true, //Will hide the amount and buy button elements if false.
+                unlocked: false,
                 jobList: [
                     { name: "merchants", exName: "Food Merchant", amount: 1, production: [new ItemRef("food", 3), new ItemRef("gold", -1), new ItemRef("influence", 1)], merchant: true },
-                    { name: "merchants", exName: "Wood Merchant", amount: 1, production: [new ItemRef("wood", 3), new ItemRef("gold", -1), new ItemRef("influence", 1)], merchant: true, duplicate: true }
+                    { name: "merchants", exName: "Wood Merchant", amount: 1, production: [new ItemRef("wood", 3), new ItemRef("gold", -1), new ItemRef("influence", 1)], merchant: true }
 
                 ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
                 costList: [
@@ -263,7 +264,32 @@ class Projects {
             }
         )
         //#endregion
-
+        //#region artisans
+        this.artisans = new Project(
+            {
+                projectName: "Artisans", //Displayed name.
+                projectDescription: "The various artisans, carpenters, blacksmiths, and other skilled workers who create the finished goods that are the true lifeblood of a city.", //The displayed description of the project.
+                nameOfAmount: "Shops", //The name of each individual purchase.
+                projectId: "artisans", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: "city", //The column which this is put into.
+                unpurchasable: true, //Will hide the amount and buy button elements if false.
+                unlocked: true,
+                jobList: [
+                    //Should be added using an upgrade and unlock Iron at the same time
+                    { name: "skilled", exName: "Toolmaker", amount: 1, production: [new ItemRef("tools", 0.1), new ItemRef("wood", -1), new ItemRef("iron", -0.5)] }
+                ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [new ItemRef("gold", 25)], //Put a Ref in to tell it what this costs. 
+                functionsList: [], //Put functions inside of here to create more functionality.
+                uIList: [], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
     }
 
     //#region methods
@@ -346,14 +372,14 @@ class ItemDisplay {
         this.projects = projects;
         this.elements = projects.elements;
         this.city = city;
-        uIManager.shell(this.elements, "itemDisplayShell", undefined, undefined, 2);
+        uIManager.shell(this.elements, "itemDisplayShell", undefined, undefined, "stats");
         uIManager.dropDown(this.elements, "itemDisplay", "Stockpile", "itemDisplayShell");
         uIManager.subEffect(this.elements, "itemDisplayDesc", function () { return ["The items stored within the city"] }.bind(this), "itemDisplay");
         var cityItems = this.city.items;
         for (var i in cityItems) {
             var item = cityItems[i];
             if (item.displayInStocks == true) {
-                uIManager.subEffect(this.elements, "itemDisplay" + item.name, function () { return [this.displayName, " :", this.amount + " + per day : " + this.addRate()] }.bind(item), "itemDisplay");
+                uIManager.subEffect(this.elements, "itemDisplay" + item.name, function () { return [this.displayName, " :", this.amount + this.addRate()] }.bind(item), "itemDisplay");
             }
         }
     }
@@ -477,14 +503,13 @@ class Project {
         var emptyList = true;
         this.jobs.forEach((job) => {
             emptyList = false;
-            if (job.name == jobObj.name && jobObj.duplicate != true) {
+            if (job.name == jobObj.name && jobObj.exName == job.exName) {
                 job.growth += jobObj.amount;
                 if (jobObj.production != undefined) {
                     job.productList.forEach((pro) => {
                         var index = job.productList.indexOf(pro);
                         if (pro.name == jobObj.production[index].name) {
                             pro.amount += jobObj.production[index].amount;
-                            console.log("exists");
                         }
                         else {
                             job.productList.push(jobObj.production[index]);
@@ -510,4 +535,5 @@ class Project {
             this.jobs.push(ref);
         }
     }
+
 }

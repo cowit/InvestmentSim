@@ -3,12 +3,12 @@ class Population {
     pops = [];
     constructor(city) {
         this.city = city;
-        uIManager.shell(this.elements, "population", undefined, "", 3);
+        uIManager.shell(this.elements, "population", undefined, "", "stats");
         uIManager.dropDown(this.elements, "popDropDown", "Population", "population");
         this.unemployed = new Pop("unemployed", 0, 1, [new ItemRef("food", -1)], city, this);
         this.farmers = new Pop("farmers", 0, 0, [], city, this);
         this.laborers = new Pop("laborers", 0, 0, [new ItemRef("food", -1)], city, this);
-        this.craftsmen = new Pop("craftsmen", 0, 0, [new ItemRef("food", -1)], city, this);
+        this.skilled = new Pop("skilled", 0, 0, [new ItemRef("food", -1)], city, this);
         this.civil = new Pop("civil", 0, 0, [new ItemRef("food", -1)], city, this);
         this.merchants = new Pop("merchants", 0, 0, [new ItemRef("food", -1)], city, this);
         this.unemployed.amount += 5;
@@ -48,11 +48,7 @@ class Pop {
         this.consumption = consumption;
         this.city = city;
         this.population.pops.push(this);
-        // uIManager.dropDown(population.elements, "popDropDown" + name, function () { return [name + " : " + this.amount] }.bind(this), "population");
         uIManager.subEffect(population.elements, "popSubEffect" + name, function () { return [name + " : " + this.amount] }.bind(this), "popDropDown");
-        /*  consumption.forEach((con) => {
-            uIManager.subEffect(population.elements, con.name + name, function () { return [con.name + " : " + con.amount] }.bind(this), "popDropDown" + name);
-        })*/
     }
 
     applyConsumption() {

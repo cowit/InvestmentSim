@@ -37,22 +37,9 @@ let uIManager = {
         var effectsWrapper = document.querySelector("#" + id);
         var projectName = document.querySelector("#" + id + "ProjectName");
         var projectDesc = document.querySelector("#" + id + "ProjectDesc");
+        var projects = document.querySelector("#" + column);
+
         if (effectsWrapper == null) {
-            var projects;
-            if (column == 1) {
-                projects = document.querySelector(".divide.projects");
-            }
-            else if (column == 2) {
-                projects = document.querySelector(".divide.items");
-            }
-            else if (column == 3) {
-                projects = document.querySelector(".divide.cities");
-            }
-            else if (column == 4) {
-                projects = document.querySelector(".divide.upgrades");
-            }
-
-
             //The container for the entire project.
             const title = document.createElement("div");
             projects.append(title);
