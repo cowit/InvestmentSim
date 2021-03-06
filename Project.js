@@ -109,6 +109,10 @@ class Projects {
             }
         )
         this.farm.onBuild(4);
+        this.farm.jobs[0].hire();
+        this.farm.jobs[0].hire();
+        this.farm.jobs[0].hire();
+        this.farm.jobs[0].hire();
         //#endregion
         //#region Housing
         this.housing = new Project(

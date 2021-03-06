@@ -1,6 +1,8 @@
 :root {
     --main-line-color: rgb(63, 63, 63);
     --button-border-color: rgb(39, 39, 39);
+    --backround-image-gradient: linear-gradient(rgb(49, 49, 49), rgb(31, 31, 31));
+    height: 100%;
 }
 
 * {
@@ -11,12 +13,16 @@
     color: rgb(179, 179, 179);
 }
 
+body {
+    height: 100%;
+}
+
 .mainView {
     width: 100%;
     height: 97%;
     position: fixed;
     display: flex;
-    background-image: linear-gradient(rgb(49, 49, 49), rgb(31, 31, 31));
+    background-image: var(--backround-image-gradient);
     justify-content: space-around;
     flex-wrap: wrap;
     overflow: scroll;
@@ -24,6 +30,13 @@
 
 .mainView::-webkit-scrollbar {
     display: none;
+}
+
+.mainImage {
+    display: block;
+    border: 3px solid var(--main-line-color);
+    width: auto;
+    height: 600px;
 }
 
 .mainHeader {
@@ -152,4 +165,12 @@
     width: 100px;
     text-align: center;
     border-radius: 3px;
+}
+
+.mainMenu {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    background-image: var(--backround-image-gradient);
 }
