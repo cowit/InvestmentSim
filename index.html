@@ -10,30 +10,34 @@
 <body>
     <!--Main Header-->
     <div class="mainHeader">
-        <div class="projectName">Simulation Game</div>
+        <div class="bigText">Simulation Game</div>
     </div>
     <div class="mainView">
         <!--Upgrades are listed here-->
         <div class="divide upgrades" id="upgrades">
-            <p class="projectName">Upgrades</p>
+            <p class="bigText">Upgrades</p>
         </div>
-        <!--Items are listed here-->
-        <div class="divide items" id="city">
-            <p class="projectName">City</p>
+        <!--The land inside of the proper city borders.-->
+        <div class=" divide items" id="city">
+            <p class="bigText">City</p>
         </div>
-        <!--Projects are listed here-->
-        <div class="divide projects" id="sLand">
-            <p class="projectName">Surrounding Land</p>
+        <!--The land surrounding the city.-->
+        <div class=" divide projects" id="sLand">
+            <p class="bigText">Surrounding Land</p>
         </div>
-        <!--Cities are listed here-->
-        <div class="divide cities" id="stats">
-            <p class="projectName">Statistics</p>
+        <!--The population and stockpile of the city.-->
+        <div class=" divide cities" id="stats">
+            <p class="bigText">Statistics</p>
+        </div>
+        <!--Great projects which take many years and massive amounts of resources to build.-->
+        <div class=" divide greatProjects close" id="greatProjects">
+            <p class="bigText">Great Projects</p>
         </div>
     </div>
 </body>
 
 
-<script src="GameManager.js"></script>
+<script src=" GameManager.js"></script>
 <script src="UIManager.js"></script>
 <script src="Items.js"></script>
 <script src="ItemManager.js"></script>

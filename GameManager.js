@@ -1,14 +1,21 @@
 let gameManager = {
     focusCity: undefined,
     cities: [],
+    delayedItems: [],
     initialize: function () {
         dayManager.startTimers();
-        dayManager.advanceDay();
+
     },
     createCity: function (name) {
         newCity = new City(name);
         this.cities.push(newCity);
         this.focusCity = newCity;
+    },
+    addDelayedItems: function () {
+        this.delayedItems.forEach((ite) => {
+            this.focusCity.items[ite.name] = ite;
+        })
+        dayManager.advanceDay();
     }
 }
 
@@ -60,5 +67,26 @@ function getPop(popName) {
     }
     else {
         return gameManager.focusCity.population[popName];
+    }
+}
+
+function iRef(name, amount, newItem) {
+    if (gameManager.focusCity == undefined && newItem != undefined) {
+        gameManager.delayedItems.push(newItem);
+    }
+    else {
+        if (newItem != undefined && gameManager.focusCity.items[name] == undefined) {
+            gameManager.focusCity.items[name] = newItem;
+        }
+    }
+    return new ItemRef(name, amount);
+}
+
+function prettyDecimal(number) {
+    if (number % 1 == 0) {
+        return number;
+    }
+    else {
+        return number.toFixed(2);
     }
 }

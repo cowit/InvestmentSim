@@ -4,8 +4,10 @@
 //gameManager.focusCity.items.gold.amount += 10;
 //gameManager.SetItemElements();
 //Branch test2
-var upgradeManager = new UpgradeManager();
+
 gameManager.createCity("Angkor");
+var upgradeManager = new UpgradeManager();
 gameManager.initialize();
+gameManager.addDelayedItems();
 
 

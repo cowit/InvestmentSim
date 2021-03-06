@@ -229,6 +229,29 @@ class Projects {
             }
         )
         //#endregion
+        //#region quarry
+        this.quarry = new Project(
+            {
+                projectName: "Quarry", //Displayed name.
+                projectDescription: "A pit dug deep into the earth. A ring of stairs carved into the edges which allow the workers to carry stone, clay, and other materials to the surface.", //The displayed description of the project.
+                nameOfAmount: "depth", //The name of each individual purchase.
+                projectId: "quarry", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 0.5, //Base efficiency of the project which effects all output.
+                column: "sLand", //The column which this is put into.
+                unlocked: false,
+                unpurchasable: true, //Will hide the amount and buy button elements if false.
+                jobList: [{ name: "laborers", exName: "Laborers", amount: 3, production: [new ItemRef("stone", 1), new ItemRef("clay", 0.2)] }], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [new ItemRef("ironTools", 20), iRef("gold", 50)], //Put a Ref in to tell it what this costs. 
+                functionsList: [], //Put functions inside of here to create more functionality.
+                uIList: [], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
         //#region marketQuarter
         this.marketQuarter = new Project(
             {
@@ -274,14 +297,71 @@ class Projects {
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
                 column: "city", //The column which this is put into.
                 unpurchasable: true, //Will hide the amount and buy button elements if false.
-                unlocked: true,
+                unlocked: false,
                 jobList: [
                     //Should be added using an upgrade and unlock Iron at the same time
-                    { name: "skilled", exName: "Toolmaker", amount: 1, production: [new ItemRef("tools", 0.1), new ItemRef("wood", -1), new ItemRef("iron", -0.5)] }
+                    { name: "skilled", exName: "Potter", amount: 1, production: [new ItemRef("pottery", 0.1), new ItemRef("wood", -1), new ItemRef("clay", -1)] }
                 ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
                 costList: [new ItemRef("gold", 25)], //Put a Ref in to tell it what this costs. 
                 functionsList: [], //Put functions inside of here to create more functionality.
                 uIList: [], //Put UI templates in to create them.               
+                //effectName: "SubEffect",
+                //name: "Growth",
+                //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
+                city: city, //The city which this belongs to.
+                projects: this //The projects which created it.
+            }
+        )
+        //#endregion
+        //#region aqueduct
+        this.aqueduct = new Project(
+            {
+                projectName: "Aqueduct", //Displayed name.
+                projectDescription: "A massive, miles long stretch of stone waterways which transport water from far away directly into the city and surrounding  countryside\
+                The need for a complete path all the way to the next closest source of water will require a massive investment in labor and resources.", //The displayed description of the project.
+                nameOfAmount: "Completed", //The name of each individual purchase.
+                projectId: "aqueduct", //The internal name for the project. Shared with the property name it belongs to.
+                baseEfficiency: 1, //Base efficiency of the project which effects all output.
+                column: "greatProjects", //The column which this is put into.
+                unpurchasable: false, //Will hide the amount and buy button elements if false.
+                unlocked: false,
+                jobList: [{
+                    name: "civil",
+                    exName: "Civil Builder",
+                    amount: 0,
+                    production: [
+                        iRef("aqueductProgress", 0.1, new Item("aqueductProgress", "Aqueduct Progress", 0, true, false)),
+                        iRef("stone", 10),
+                        iRef("gold", 3)
+                    ],
+                    baseAmount: 10
+                },
+                { name: "civil", exName: "Maintence Workers", amount: 1, production: [new ItemRef("water", 50)] }
+                ], //Put an object literal in { name: "farmers", amount: 1, production: [new ItemRef("food", 1)] }
+                costList: [], //Put a Ref in to tell it what this costs. 
+                functionsList: [
+                    {
+                        callBack: "onProduce", //onStart onProduce onBuild
+                        onCall: function () {
+                            if (getItem("aqueductProgress").amount >= 100) {
+                                this.onBuild();
+                                getItem("aqueductProgress").amount = 0;
+                            }
+                        }
+                    },
+                ], //Put functions inside of here to create more functionality.
+                uIList: [
+                    {
+                        effectName: "SubEffect",
+                        name: "completedAqueducts",
+                        onSet: function () { return ["Completed : " + this.amount] }
+                    },
+                    {
+                        effectName: "SubEffect",
+                        name: "progressAqueducts",
+                        onSet: function () { return ["Progress : " + prettyDecimal(getItem("aqueductProgress").amount) + " / 100"] }
+                    }
+                ], //Put UI templates in to create them.               
                 //effectName: "SubEffect",
                 //name: "Growth",
                 //onSet: function () { return ["Growth: ", this.storedFood, " / ", this.city.population.sum()] } 
@@ -336,32 +416,6 @@ class Projects {
         }
     }
 
-    refineDelta(prodList, workerList, amount, city) {
-        var delta;
-        prodList.forEach((pro) => {
-            if (pro.amount < 0) {
-                if (delta == undefined) {
-                    delta = Math.floor(city.items[pro.name].amount / Math.abs(pro.amount));
-
-                }
-                else {
-                    delta = Math.floor(Math.min(delta, city.items[pro.name].amount / Math.abs(pro.amount)));
-
-                }
-            }
-            else if (prodList.length == prodList.indexOf(pro) + 1) {
-                delta = amount;
-            }
-
-        })
-        if (workerList.length > 0) {
-            workerList.forEach((wor) => {
-                delta = Math.floor(Math.min(delta, wor.multiplyByJobsRatio(delta)))
-            })
-        }
-        delta = Math.min(amount, delta);
-        return delta;
-    }
     //#endregion
 
 }
@@ -379,7 +433,8 @@ class ItemDisplay {
         for (var i in cityItems) {
             var item = cityItems[i];
             if (item.displayInStocks == true) {
-                uIManager.subEffect(this.elements, "itemDisplay" + item.name, function () { return [this.displayName, " :", this.amount + this.addRate()] }.bind(item), "itemDisplay");
+                uIManager.subEffect(this.elements, "itemDisplay" + item.name,
+                    function () { return [this.displayName, " :", this.amount + " : " + this.addRate()] }.bind(item), "itemDisplay");
             }
         }
     }
@@ -452,11 +507,7 @@ class Project {
             this.amountEffect.closeEffect();
             this.costsRef.close();
         }
-        else {
-            this.buyButton.openButton();
-            this.amountEffect.openEffect();
-            this.costsRef.open();
-        }
+
         //#endregion
 
         //Tells the Projects to activate this when the production Callback happens. Delete this and onProduce to disable.
@@ -477,7 +528,6 @@ class Project {
         if (this.unlocked == true) {
             this.jobs.forEach(job => job.produce());
             this.produceFunctions.forEach(fun => fun());
-
             if (this.unpurchasable == false) {
                 this.buyButton.closeButton();
                 this.amountEffect.closeEffect();
@@ -519,7 +569,7 @@ class Project {
                 }
             }
             else {
-                var ref = new JRef(this.city, this, jobObj.name, jobObj.exName, jobObj.amount, jobObj.production);
+                var ref = new JRef(this.city, this, jobObj.name, jobObj.exName, jobObj.amount, jobObj.production, jobObj.baseAmount);
                 if (jobObj.merchant == true) {
                     ref.merchant = true;
                 }
@@ -528,7 +578,7 @@ class Project {
         })
 
         if (emptyList == true) {
-            var ref = new JRef(this.city, this, jobObj.name, jobObj.exName, jobObj.amount, jobObj.production);
+            var ref = new JRef(this.city, this, jobObj.name, jobObj.exName, jobObj.amount, jobObj.production, jobObj.baseAmount);
             if (jobObj.merchant == true) {
                 ref.merchant = true;
             }

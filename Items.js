@@ -1,11 +1,14 @@
 class Items {
     constructor() {
-        this.gold = new Item("gold", "Gold", 5, true);
+        this.gold = new Item("gold", "Gold", 500, true);
         this.food = new Item("food", "Food", 20, true);
         this.wheat = new Item("wheat", "Wheat", 25, true);
         this.wood = new Item("wood", "Wood", 60, true);
         this.iron = new Item("iron", "Iron", 0, false);
-        this.tools = new Item("tools", "Tools", 0, true);
+        this.stone = new Item("stone", "Stone", 0, false);
+        this.clay = new Item("clay", "Clay", 0, false);
+        this.pottery = new Item("pottery", "Pottery", 0, true);
+        this.ironTools = new Item("ironTools", "Iron Tools", 0, false);
         this.water = new Item("water", "Water", 20, false);
     }
 }
@@ -21,14 +24,10 @@ class Item {
         this.displayInStocks = displayInStocks;
     }
     add(value) {
-        if (this.amount + value >= 0) {
-            this.amount = this.amount + value;
-        }
+        this.amount = this.amount + value;
     }
     subtract(value) {
-        if (this.amount - value > 0) {
-            this.amount = this.amount - value;
-        }
+        this.amount = this.amount - value;
     }
     addRate() {
         var rate = 0;
@@ -54,7 +53,7 @@ class JRef {
     max = 0;
     merchant = false;
     buying = true;
-    constructor(city, project, name, exName, growth, productList /* A list of objects {name: "food", amount: 1}*/) {
+    constructor(city, project, name, exName, growth, productList /* A list of objects {name: "food", amount: 1}*/, baseAmount) {
         this.city = city;
         this.name = name; //The name of the job this targets.
         this.exName = exName;
@@ -63,19 +62,22 @@ class JRef {
         this.max = growth * project.amount; //Multiplies growth by the number of purchased projects.
         this.amount = 0;
         this.productList = productList; //A list of objects {name: "food", amount: 1}
-        for (let index = 0; index < project.amount; index++) {
-            this.hire();
-        }
+        this.baseAmount = baseAmount;
     }
 
     onBuild() {
         this.max = Math.ceil(this.growth * this.project.amount);
-        this.hire();
+        if (this.baseAmount > 0) {
+            this.max += this.baseAmount;
+        }
     }
 
     produce() {
-
         this.max = Math.ceil(this.growth * this.project.amount);
+        //console.log(this.baseAmount);
+        if (this.baseAmount > 0) {
+            this.max += this.baseAmount;
+        }
         while (this.amount > this.max) {
             this.fire();
         }
@@ -153,26 +155,27 @@ class JRef {
 
     fire(calledByHire = false) {
         //console.log("Fire Log " + "Buying: " + this.buying + " Called by hire: " + (calledByHire == true));
-        if (this.buying || calledByHire == true) {
-            if (this.amount > 0) {
-                this.city.population[this.name].amount -= 1;
-                this.city.population["unemployed"].amount += 1;
-                this.amount -= 1;
-                if (this.amount == 0 && this.buying == true && this.merchant == true) {
-                    this.buying = false;
-                    this.swap();
+        if (this.project.guildProtected != true) {
+            if (this.buying || calledByHire == true) {
+                if (this.amount > 0) {
+                    this.city.population[this.name].amount -= 1;
+                    this.city.population["unemployed"].amount += 1;
+                    this.amount -= 1;
+                    if (this.amount == 0 && this.buying == true && this.merchant == true) {
+                        this.buying = false;
+                        this.swap();
+                    }
+                    else if (this.amount == 0 && this.buying == false) {
+                        this.buying = true;
+                        this.swap();
+                    }
                 }
-                else if (this.amount == 0 && this.buying == false) {
-                    this.buying = true;
-                    this.swap();
-                }
+
             }
-
+            else if (this.merchant) { //Will increase the amount hired and swap the effects. Switching it to selling mode.
+                this.hire(true);
+            }
         }
-        else if (this.merchant) { //Will increase the amount hired and swap the effects. Switching it to selling mode.
-            this.hire(true);
-        }
-
     }
 }
 
@@ -198,6 +201,10 @@ class ItemRef {
         return success;
     }
 
+    displayName() {
+        return gameManager.focusCity.items[this.name].displayName;
+
+    }
 
 }
 

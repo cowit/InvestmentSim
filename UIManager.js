@@ -216,11 +216,21 @@ class JobRefEffect {
                 ref.wrapper = document.createElement("div");
                 this.wrapperElement.append(ref.wrapper);
                 ref.minusButton = document.createElement("div");
-                ref.minusButton.textContent = "-";
+                if (job.merchant == true) {
+                    ref.minusButton.textContent = "sell";
+                }
+                else {
+                    ref.minusButton.textContent = "-";
+                }
                 ref.minusButton.className = "workerButton";
                 ref.wrapper.append(ref.minusButton);
                 ref.plusButton = document.createElement("div");
-                ref.plusButton.textContent = "+";
+                if (job.merchant == true) {
+                    ref.plusButton.textContent = "buy";
+                }
+                else {
+                    ref.plusButton.textContent = "+";
+                }
                 ref.plusButton.className = "workerButton";
                 ref.wrapper.append(ref.plusButton);
                 ref.popDisplay = document.createElement("p");
@@ -264,13 +274,13 @@ class JRERef {
         jobRef.productList.forEach((pro) => {
 
             if (this.productElements[index] != undefined) {
-                this.productElements[index].textContent = gameManager.focusCity.items[pro.name].displayName + " : " + (pro.amount * jobRef.project.efficiency);
+                this.productElements[index].textContent = gameManager.focusCity.items[pro.name].displayName + " : " + prettyDecimal(pro.amount * jobRef.project.efficiency);
             }
             else {
                 var proPara = document.createElement("p");
                 this.wrapper.append(proPara);
                 this.wrapper.className = "workerWrapper";
-                proPara.textContent = pro.name + " : " + pro.amount;
+                proPara.textContent = pro.name + " : " + Math.round(pro.amount);
                 this.productElements.push(proPara);
             }
             index++;
@@ -278,6 +288,14 @@ class JRERef {
                 this.productElements[index].remove();
             }
         })
+
+
+        if (jobRef.project.guildProtected == true) {
+            this.minusButton.className = "close";
+        }
+        else {
+            this.minusButton.className = "workerButton";
+        }
     }
 }
 
@@ -434,13 +452,13 @@ class RefEffect {
             var i = checkList.indexOf(ref);
             if (this.refList.length == i) {
                 var par = document.createElement("p");
-                par.textContent = ref.name + " : " + ref.amount;
+                par.textContent = ref.displayName() + " : " + ref.amount;
                 this.refList.push(par)
                 this.element.append(par);
                 par.append(document.createElement("br"));
             }
             else {
-                this.refList[i].textContent = ref.name + " : " + ref.amount;
+                this.refList[i].textContent = ref.displayName() + " : " + ref.amount;
             }
         });
         if (this.refList.length > checkList.length) {

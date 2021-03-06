@@ -11,7 +11,8 @@ class UpgradeManager {
             [
                 "The small farms around which birthed this village have provided us with a steady flow of food.",
                 "Although it is time to encourage further use of the land that we control by providing wood and land to people who wish to work it.",
-                "Purchasing this will allow us to create more farms."
+                "Purchasing this will allow us to create more farms.",
+                "(You can also assign farmers to the farm by clicking the plus/minus buttons next to their name!)"
             ],
             function () {
                 this.unpurchasable = true;
@@ -95,13 +96,13 @@ class UpgradeManager {
             [
                 "Gaining a market charter would allow us to open a local market. Allowing us to profit from sold goods and to easily gain other resources.",
                 "Our rapid growth and strategic position on a crossroads should make our petition easy to pass once we bring it up with the local noble",
-                "Although a small tribute of grain will assure it will be granted in a timely manner.",
+                "Although a small tribute will assure it will be granted in a timely manner.",
 
             ], //This will add a line break between each item in the list.
             function () {
                 getProject("marketQuarter").unlocked = true;
             },
-            [new ItemRef("food", 50)] /* UpgradeCost */,
+            [new ItemRef("wood", 50)] /* UpgradeCost */,
             ["global"] //Which cards this effects.
         );
         this.marketTutorial = new Upgrade(
@@ -120,13 +121,106 @@ class UpgradeManager {
             [/*new Ref("wood", 10)*/] /* UpgradeCost */,
             [/*"workshop"*/] //Which cards this effects.
         );
+        //#region artisanGrowth
+        this.artisanGrowth = new Upgrade(
+            this,
+            "artisanGrowth",
+            "Growth of Artisans",
+            [
+                "Now that the city has gained the rights to host a market and thus allowed us to have more access to goods, the small amount of artisans which produced barely more than what was needed for the townsfolk now see they can easily sell excess wares.",
+                "Along with existing shops growing to try to make more, new shops have been constructed around the burgening market. As more traders flow through and new opportunities arise, more and more stalls will open and allow for a greater profit.",
+                "This will require a greater movement of wood along with any raw materials needed."
+            ], //This will add a line break between each item in the list.
+            function () {
+                getProject("artisans").unlocked = true;
+            },
+            [iRef("wood", 25)] /* UpgradeCost */,
+            ["global"] //Which cards this effects.
+        );
+        //#endregion
+        //#region irrigation
+        this.irrigation = new Upgrade(
+            this,
+            "irrigation",
+            "Irrigation",
+            [
+                "It's been long known that supplying crops with additional water allows them to grow larger. Allowing better harvests each year with less work.",
+                "While some can use rivers to feed their hungry fields we will need a large supply of water. Although some small scale irrigation from wells",
+                "Allows farmers to use water to greatly increase yields."
+            ], //This will add a line break between each item in the list.
+            function () {
+                this.editJobs({ name: "farmer", exName: "Irrigated", amount: 1, production: [iRef("food", 2), iRef("water", -1)] })
+            },
+            [iRef("wood", 50)] /* UpgradeCost */,
+            ["farm"] //Which cards this effects.
+        );
+        //#endregion
+        //#region unlockAqueduct
+        this.unlockAqueduct = new Upgrade(
+            this,
+            "unlockAqueduct",
+            "Water water everywhere",
+            [
+                "The thirsty citizens and farms have been crying out in need. Simply adding more wells will not do to meet the rising demands. Something far larger and efficient will be needed.",
+                "Although not common to see, the technology we need is already known. We must construct a system of aqueducts so that we can meet our thirst.",
+                "This will not be a fast or simple process, luckily the same thirsty citizens will be happy to construct them.",
+                "Scholars and Architects must be commisioned to plan and guide such a task. This of course will add additional costs before we begin."
+            ], //This will add a line break between each item in the list.
+            function () {
+                this.unlocked = true;
+                document.querySelector("#greatProjects").className = "divide greatProjects";
+            },
+            [iRef("gold", 250)] /* UpgradeCost */,
+            ["aqueduct"] //Which cards this effects.
+        );
+        //#endregion
+        //#region guilds
+        this.guilds = new Upgrade(
+            this,
+            "guilds",
+            "Guilds",
+            [
+                "As more and more artisans and stalls begin to open. The Artisans have come together to form guilds to protect profits and make sure the city's needs are met.",
+                "By placing price controls to make sure no one runs anyone else out of business along with an apprenticeship system which ensures knowledge is kept inside of the trade.",
+                "Although this will mean that business is much less fluid and Artisans will no longer be able to move from job to job.",
+                "Artisan efficiency is raised by 50%"
+            ], //This will add a line break between each item in the list.
+            function () {
+                this.guildProtected = true;
+                this.efficiency += 0.5;
+            },
+            [iRef("gold", 100)] /* UpgradeCost */,
+            ["artisans"] //Which cards this effects.
+        );
+        //#endregion
+        //#region localQuarry
+        this.localQuarry = new Upgrade(
+            this,
+            "localQuarry",
+            "Quarry for local stone",
+            [
+                "Our ability to support the growth of out potters productivity is being hampered by the large human effort and cost in gold of transporting the large, heavy clay that they require.",
+                "This, along with any upcoming plans for large stone buildings such as aqueducts and other marvels will require tonnes of stone which will be prohibitively expensive unless we are to use our local resources.",
+                "Opening a quarry will allow easy access to clay and stone among other resources which will be neccesary for growing to a true regional power."
+            ], //This will add a line break between each item in the list.
+            function () {
+                this.unlocked = true;
+                this.onBuild();
+            },
+            getProject("quarry").costs /* UpgradeCost */,
+            ["quarry"] //Which cards this effects.
+        );
+        //#endregion
         //#endregion
     }
 
     unlockUpgrades() {
-        if (this.tutorial == true)
+        if (this.tutorial == true) {
             this.dropDownTutorial.unlock();
+        }
+
         this.farmInvestments.unlock();
+
         if (getProject("farm").amount >= 5) {
             this.influentialFarms.unlock();
         }
@@ -143,9 +237,29 @@ class UpgradeManager {
             this.fallowedFields.unlock();
         }
 
-        if (getPop("total") >= 20) {
+        if (getPop("total") >= 15) {
             this.marketCharter.unlock();
             this.marketTutorial.unlock();
+        }
+
+        if (this.marketCharter.unlocked == true && getItem("influence").amount >= 150) {
+            this.artisanGrowth.unlock();
+        }
+
+        if (getPop("skilled").amount >= 10) {
+            this.guilds.unlock();
+        }
+
+        if (getItem("influence").amount >= 1000) {
+            this.irrigation.unlock();
+        }
+
+        if (this.irrigation.unlocked == true) {
+            this.unlockAqueduct.unlock();
+        }
+
+        if (this.unlockAqueduct.unlocked == true) {
+            this.localQuarry.unlock();
         }
 
     }
