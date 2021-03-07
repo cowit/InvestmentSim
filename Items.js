@@ -10,6 +10,7 @@ class Items {
         this.pottery = new Item("pottery", "Pottery", 0, true);
         this.ironTools = new Item("ironTools", "Iron Tools", 0, false);
         this.water = new Item("water", "Water", 20, false);
+        this.marble = new Item("rawMarble", "Raw Marble", 0, false, true);
     }
 }
 
@@ -211,4 +212,31 @@ class ItemRef {
 class RateRef {
     name;
     rate = 0;
+}
+
+class ItemDisplayRef {
+    constructor(item) {
+        this.wrapper = document.createElement("div");
+        this.wrapper.className = "close";
+        document.querySelector(".itemHeader").append(this.wrapper);
+        this.name = document.createElement("p");
+        this.name.className = "item";
+        this.wrapper.append(this.name);
+        this.amount = document.createElement("p");
+        this.amount.className = "itemAmount";
+        this.wrapper.append(this.amount);
+        this.rate = document.createElement("p");
+        this.rate.className = "itemDaily";
+        this.wrapper.append(this.rate);
+        this.item = item;
+    }
+
+    set() {
+        if (true) {
+            this.wrapper.className = "itemWrapper";
+            this.name.textContent = this.item.displayName;
+            this.amount.textContent = this.item.amount;
+            this.rate.textContent = this.item.addRate() + "/d";
+        }
+    }
 }

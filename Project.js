@@ -143,7 +143,7 @@ class Projects {
                                 this.storedFood = 0;
                             }
                             if (this.city.items["food"].addRate() > 1) {
-                                this.storedFood += Math.floor(this.city.items["food"].amount * (this.growthRate / 100));
+                                this.storedFood += Math.min(Math.floor(this.city.items["food"].amount * (this.growthRate / 100)), this.city.population.sum());
                             }
                             if (this.storedFood > this.city.population.sum()) {
                                 this.storedFood -= this.city.population.sum();
@@ -430,15 +430,10 @@ class ItemDisplay {
         this.projects = projects;
         this.elements = projects.elements;
         this.city = city;
-        uIManager.shell(this.elements, "itemDisplayShell", undefined, undefined, "stats");
-        uIManager.dropDown(this.elements, "itemDisplay", "Stockpile", "itemDisplayShell");
-        uIManager.subEffect(this.elements, "itemDisplayDesc", function () { return ["The items stored within the city"] }.bind(this), "itemDisplay");
-        var cityItems = this.city.items;
-        for (var i in cityItems) {
-            var item = cityItems[i];
+        for (var i in city.items) {
+            var item = city.items[i];
             if (item.displayInStocks == true) {
-                uIManager.subEffect(this.elements, "itemDisplay" + item.name,
-                    function () { return [this.displayName, " :", this.amount + " : " + this.addRate()] }.bind(item), "itemDisplay");
+                this.elements.push(new ItemDisplayRef(item));
             }
         }
     }
