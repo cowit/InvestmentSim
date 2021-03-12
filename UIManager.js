@@ -170,7 +170,7 @@ let uIManager = {
         }
         parentList.push(new ProductionEffect(wrapper, name, prodList));
     },
-    jobRefEffect: function (parentList, id, name, jobList, attachTo) {
+    jobRefEffect: function (parentList, id, name, project, attachTo) {
         var wrapper = document.querySelector("#" + id);
         if (wrapper == undefined) {
             wrapper = document.createElement("div");
@@ -178,21 +178,22 @@ let uIManager = {
             document.querySelector("#" + attachTo).append(document.createElement("br"));
             document.querySelector("#" + attachTo).append(wrapper);
         }
-        parentList.push(new JobRefEffect(wrapper, name, jobList));
+        parentList.push(new JobRefEffect(wrapper, name, project));
     },
 }
 
 class JobRefEffect {
     elements = {}
     headerElement;
-    constructor(wrapperElement, name, jobList) {
+    constructor(wrapperElement, name, project) {
         this.wrapperElement = wrapperElement;
         this.name = name;
-        this.jobList = jobList;
+        this.project = project;
         this.set();
     }
 
     set() {
+        this.jobList = this.project.jobs;
         if (this.headerElement != undefined) {
             this.headerElement.textContent = this.name;
         }
@@ -255,6 +256,10 @@ class JRERef {
     buying;
 
     set(jobRef) {
+        /*if (jobRef.name == "farmers") {
+            console.log(jobRef);
+        }*/
+
         this.popDisplay.textContent = jobRef.exName + " : " + jobRef.amount + " / " + jobRef.max;
         var index = 0;
         if (this.buying == undefined) {

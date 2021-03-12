@@ -1,6 +1,7 @@
 class Projects {
     producers = []
     elements = []
+    projectsList = []
     constructor(city) {
         this.city = city;
         this.itemDisplay = new ItemDisplay(city, this);
@@ -8,7 +9,7 @@ class Projects {
         this.landManagement = new Project(
             {
                 projectName: "Land Management", //Displayed name.
-                projectDescription: "The land administered by this city. The amount you control is increased by your influence. Each piece of land needs additional influence.", //The displayed description of the project.
+                projectDescription: "The land administered by this city. The amount you control is increased by your influence. \n Each piece of land needs more influence than the last.", //The displayed description of the project.
                 nameOfAmount: "Projects", //The name of each individual purchase.
                 projectId: "landManagement", //The internal name for the project. Shared with the property name it belongs to.
                 baseEfficiency: 1, //Base efficiency of the project which effects all output.
@@ -23,13 +24,13 @@ class Projects {
                         onCall: function () {
                             this.land = 51;
                             this.influencedLand = 1;
-                            this.city.items.influence = new Item("influence", "Influence", 0, true, false);
+                            this.city.items.influence = new Item(this.city.items.items, "influence", "Influence", 0, true, true);
                         }
                     },
                     {
                         callBack: "onProduce", //onStart onProduce onBuild
                         onCall: function () {
-                            var effect = Math.max(0, Math.floor(((this.city.items["influence"].amount / this.influencedLand) - this.influencedLand)));
+                            var effect = Math.max(0, Math.floor(((getItem("influence").amount / this.influencedLand) - this.influencedLand)));
                             if (effect != NaN) {
                                 this.influencedLand += effect;
                                 this.land += effect;
@@ -108,11 +109,6 @@ class Projects {
                 projects: this //The projects which created it.
             }
         )
-        this.farm.onBuild(4);
-        this.farm.jobs[0].hire();
-        this.farm.jobs[0].hire();
-        this.farm.jobs[0].hire();
-        this.farm.jobs[0].hire();
         //#endregion
         //#region Housing
         this.housing = new Project(
@@ -334,9 +330,9 @@ class Projects {
                     exName: "Civil Builder",
                     amount: 0,
                     production: [
-                        iRef("aqueductProgress", 0.1, new Item("aqueductProgress", "Aqueduct Progress", 0, true, false)),
-                        iRef("stone", 10),
-                        iRef("gold", 3)
+                        iRef("aqueductProgress", 0.1, new Item(this.city.items.items, "aqueductProgress", "Aqueduct Progress", 0, true, false)),
+                        iRef("stone", -10),
+                        iRef("gold", -3)
                     ],
                     baseAmount: 10
                 },
@@ -430,12 +426,11 @@ class ItemDisplay {
         this.projects = projects;
         this.elements = projects.elements;
         this.city = city;
-        for (var i in city.items) {
-            var item = city.items[i];
+        city.items.items.forEach((item) => {
             if (item.displayInStocks == true) {
                 this.elements.push(new ItemDisplayRef(item));
             }
-        }
+        })
     }
 }
 
@@ -466,6 +461,7 @@ class Project {
         this.unpurchasable = conObj.unpurchasable;
         this.land = conObj.projects["landManagement"];
         //A list of JRefs() which determine which workers make what.
+        this.jobObj = conObj.jobList;
         this.jobs = [];
         conObj.jobList.forEach((job) => {
             this.editJobs(job);
@@ -498,7 +494,7 @@ class Project {
             }
         })
         //#endregion
-        uIManager.jobRefEffect(this.elements, projectId, "Workers", this.jobs, projectId)
+        uIManager.jobRefEffect(this.elements, projectId, "Workers", this, projectId)
         this.costsRef = uIManager.refEffect(this.elements, projectId + "Costs", "Costs", function () { return this.costs }.bind(this), projectId);
         this.buyButton = uIManager.buildButton(this.elements, projectId + "Buy", function () { if (this.projects.applyCosts(this.costs)) { this.onBuild() } }.bind(this), projectId);
         if (this.unpurchasable == false) {
@@ -511,6 +507,7 @@ class Project {
 
         //Tells the Projects to activate this when the production Callback happens. Delete this and onProduce to disable.
         this.projects.producers.push(this.onProduce.bind(this));
+        this.projects.projectsList.push(this);
     }
 
     onBuild(amount = 1) {//Code which is called by BuildButton if you can afford it.
@@ -525,6 +522,7 @@ class Project {
 
     onProduce() {//Called at the end of each day by projects.producers.
         if (this.unlocked == true) {
+            //console.log(this.jobs[0]);
             this.jobs.forEach(job => job.produce());
             this.produceFunctions.forEach(fun => fun());
             if (this.unpurchasable == false) {

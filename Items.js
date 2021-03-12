@@ -1,23 +1,24 @@
 class Items {
+    items = []
     constructor() {
-        this.gold = new Item("gold", "Gold", 500, true);
-        this.food = new Item("food", "Food", 20, true);
-        this.wheat = new Item("wheat", "Wheat", 25, true);
-        this.wood = new Item("wood", "Wood", 60, true);
-        this.iron = new Item("iron", "Iron", 0, false);
-        this.stone = new Item("stone", "Stone", 0, false);
-        this.clay = new Item("clay", "Clay", 0, false);
-        this.pottery = new Item("pottery", "Pottery", 0, true);
-        this.ironTools = new Item("ironTools", "Iron Tools", 0, false);
-        this.water = new Item("water", "Water", 20, false);
-        this.marble = new Item("rawMarble", "Raw Marble", 0, false, true);
+        this.gold = new Item(this.items, "gold", "Gold", 500, true);
+        this.food = new Item(this.items, "food", "Food", 20, true);
+        this.wood = new Item(this.items, "wood", "Wood", 60, true);
+        this.iron = new Item(this.items, "iron", "Iron", 0, false);
+        this.stone = new Item(this.items, "stone", "Stone", 0, false);
+        this.clay = new Item(this.items, "clay", "Clay", 0, false);
+        this.pottery = new Item(this.items, "pottery", "Pottery", 0, false);
+        this.ironTools = new Item(this.items, "ironTools", "Iron Tools", 0, false);
+        this.water = new Item(this.items, "water", "Water", 20, false);
+        this.marble = new Item(this.items, "rawMarble", "Raw Marble", 0, false, true);
     }
 }
 
 class Item {
-    parent; //What contains this item
     rateList = [];
-    constructor(name, displayName, amount, unlocked = false, displayInStocks = true) {
+    constructor(parentList, name, displayName, amount, unlocked = false, displayInStocks = true) {
+        this.parentList = parentList;
+        this.parentList.push(this);
         this.unlocked = unlocked; //Defaults to false, Locked items will not be displayed but will exist.
         this.name = name;
         this.displayName = displayName;
@@ -74,6 +75,12 @@ class JRef {
     }
 
     produce() {
+        /*if (this.project.projectId == "farm") {
+            console.log("Amount " + this.amount);
+            console.log("Max " + this.max);
+            console.log(this);
+        }*/
+        //console.log("Items.Produce()");
         this.max = Math.ceil(this.growth * this.project.amount);
         //console.log(this.baseAmount);
         if (this.baseAmount > 0) {
@@ -133,7 +140,7 @@ class JRef {
             if (this.city.population["unemployed"].amount >= 1 && this.amount < this.max) {
                 this.city.population["unemployed"].amount -= 1;
                 this.city.population[this.name].amount += 1;
-                //#region Function which allows the Pop reference to see where jobs are placed. So they can be removed randomly when a pop dies.
+                /*//#region Function which allows the Pop reference to see where jobs are placed. So they can be removed randomly when a pop dies.
                 this.city.population[this.name].jobs.forEach((job) => {
                     var exists = false;
                     if (job != this) {
@@ -143,7 +150,7 @@ class JRef {
                         this.city.population[this.name].jobs.push(this);
                     }
                 })
-                //#endregion
+                //#endregion*/
                 this.amount += 1;
             }
         }
@@ -158,18 +165,20 @@ class JRef {
         //console.log("Fire Log " + "Buying: " + this.buying + " Called by hire: " + (calledByHire == true));
         if (this.project.guildProtected != true) {
             if (this.buying || calledByHire == true) {
+                if (this.amount == 0 && this.buying == true && this.merchant == true) {
+                    this.buying = false;
+                    this.swap();
+                }
+                else if (this.amount == 0 && this.buying == false) {
+                    this.buying = true;
+                    this.swap();
+                }
+
                 if (this.amount > 0) {
                     this.city.population[this.name].amount -= 1;
                     this.city.population["unemployed"].amount += 1;
                     this.amount -= 1;
-                    if (this.amount == 0 && this.buying == true && this.merchant == true) {
-                        this.buying = false;
-                        this.swap();
-                    }
-                    else if (this.amount == 0 && this.buying == false) {
-                        this.buying = true;
-                        this.swap();
-                    }
+
                 }
 
             }
@@ -188,6 +197,9 @@ class ItemRef {
     }
 
     produce(city, multiplier) {
+        if (city == undefined) {
+            city = gameManager.focusCity;
+        }
         var total = this.amount * multiplier;
         if (this.rateObj == undefined) {
             this.rateObj = new RateRef();
@@ -232,11 +244,34 @@ class ItemDisplayRef {
     }
 
     set() {
-        if (true) {
+        if (this.item.unlocked == true) {
             this.wrapper.className = "itemWrapper";
             this.name.textContent = this.item.displayName;
             this.amount.textContent = this.item.amount;
-            this.rate.textContent = this.item.addRate() + "/d";
+            this.rate.textContent = this.item.addRate() + "/day";
+        }
+    }
+}
+
+class PopConsumption {
+    constructor(itemRef, happiness, required = false) {
+        this.itemRef = itemRef;
+        this.happiness = happiness;
+        this.required = required;
+    }
+
+    onConsume(pop) {
+        if (this.itemRef.produce(undefined, pop.salary * pop.amount)) {
+            pop.happiness += (this.happiness * pop.salary) * pop.amount;
+        }
+        else if (this.required == true) {
+            if (0 < pop.happiness - (this.happiness * pop.salary) * pop.amount) {
+                pop.happiness -= (this.happiness * pop.salary) * pop.amount;
+            }
+            else {
+                pop.happiness = 0;
+            }
+
         }
     }
 }

@@ -215,12 +215,16 @@ class UpgradeManager {
     }
 
     unlockUpgrades() {
+        this.upgrades.forEach((upg) => {
+            if (upg.purchased == true && upg.baseElement != undefined) {
+                upg.baseElement.remove();
+            }
+        })
         if (this.tutorial == true) {
             this.dropDownTutorial.unlock();
         }
 
         this.farmInvestments.unlock();
-
         if (getProject("farm").amount >= 5) {
             this.influentialFarms.unlock();
         }
@@ -277,6 +281,7 @@ class Upgrade {
     unlocked = false;
     constructor(uM, id, name, description, effect, costs, targetBuildings) {
         this.uM = uM; //Upgrade Manager.
+        this.uM.upgrades.push(this);
         this.elements = uM.elements;
         this.id = id;
         this.name = name;
@@ -284,6 +289,7 @@ class Upgrade {
         this.effect = effect; //A function which activates when purchased.
         this.costs = costs; //A list of Refs passed by the constructor.
         this.targetBuildings = targetBuildings; //A list of strings which tell it which buildings this effect.
+
     }
 
     unlock() {

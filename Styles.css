@@ -58,8 +58,9 @@ body {
     display: flex;
     width: 300px;
     border: 3px solid var(--main-line-color);
-    border-radius: 10px;
+    border-radius: 20px;
     margin-left: 10px;
+    margin-right: -10px;
 }
 
 .item {
@@ -106,6 +107,7 @@ body {
     font-size: larger;
     font-weight: bold;
     text-align: center;
+    display: inline;
 }
 
 .subEffect {
@@ -163,10 +165,13 @@ body {
     display: inline-block;
     margin-right: 6px;
     border: 3px solid var(--main-line-color);
-    width: 18px;
-    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    width: auto;
     text-align: center;
     border-radius: 10px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .dropDown {
